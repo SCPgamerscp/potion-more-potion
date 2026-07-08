@@ -1,0 +1,39 @@
+{
+  "effect.potionmorepotion.oak_blessing": "Blessing of the Oak Tree",
+  "effect.potionmorepotion.birch_blessing": "Blessing of the Birch Tree",
+  "effect.potionmorepotion.stone_blessing": "Blessing of Stone",
+  "effect.potionmorepotion.cobblestone_blessing": "Blessing of Cobblestone",
+
+  "item.minecraft.potion.effect.oak_blessing": "Potion of the Oak Blessing",
+  "item.minecraft.splash_potion.effect.oak_blessing": "Splash Potion of the Oak Blessing",
+  "item.minecraft.lingering_potion.effect.oak_blessing": "Lingering Potion of the Oak Blessing",
+  "item.minecraft.tipped_arrow.effect.oak_blessing": "Arrow of the Oak Blessing",
+
+  "item.minecraft.potion.effect.birch_blessing": "Potion of the Birch Blessing",
+  "item.minecraft.splash_potion.effect.birch_blessing": "Splash Potion of the Birch Blessing",
+  "item.minecraft.lingering_potion.effect.birch_blessing": "Lingering Potion of the Birch Blessing",
+  "item.minecraft.tipped_arrow.effect.birch_blessing": "Arrow of the Birch Blessing",
+
+  "item.minecraft.potion.effect.stone_blessing": "Potion of the Stone Blessing",
+  "item.minecraft.splash_potion.effect.stone_blessing": "Splash Potion of the Stone Blessing",
+  "item.minecraft.lingering_potion.effect.stone_blessing": "Lingering Potion of the Stone Blessing",
+  "item.minecraft.tipped_arrow.effect.stone_blessing": "Arrow of the Stone Blessing",
+
+  "item.minecraft.potion.effect.cobblestone_blessing": "Potion of the Cobblestone Blessing",
+  "item.minecraft.splash_potion.effect.cobblestone_blessing": "Splash Potion of the Cobblestone Blessing",
+  "item.minecraft.lingering_potion.effect.cobblestone_blessing": "Lingering Potion of the Cobblestone Blessing",
+  "item.minecraft.tipped_arrow.effect.cobblestone_blessing": "Arrow of the Cobblestone Blessing",
+
+  "effect.potionmorepotion.deepslate_blessing": "Blessing of Deepslate",
+  "effect.potionmorepotion.cobbled_deepslate_blessing": "Blessing of Cobbled Deepslate",
+
+  "item.minecraft.potion.effect.deepslate_blessing": "Potion of the Deepslate Blessing",
+  "item.minecraft.splash_potion.effect.deepslate_blessing": "Splash Potion of the Deepslate Blessing",
+  "item.minecraft.lingering_potion.effect.deepslate_blessing": "Lingering Potion of the Deepslate Blessing",
+  "item.minecraft.tipped_arrow.effect.deepslate_blessing": "Arrow of the Deepslate Blessing",
+
+  "item.minecraft.potion.effect.cobbled_deepslate_blessing": "Potion of the Cobbled Deepslate Blessing",
+  "item.minecraft.splash_potion.effect.cobbled_deepslate_blessing": "Splash Potion of the Cobbled Deepslate Blessing",
+  "item.minecraft.lingering_potion.effect.cobbled_deepslate_blessing": "Lingering Potion of the Cobbled Deepslate Blessing",
+  "item.minecraft.tipped_arrow.effect.cobbled_deepslate_blessing": "Arrow of the Cobbled Deepslate Blessing"
+}

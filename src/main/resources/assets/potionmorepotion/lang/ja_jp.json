@@ -1,0 +1,39 @@
+{
+  "effect.potionmorepotion.oak_blessing": "オークの木の加護",
+  "effect.potionmorepotion.birch_blessing": "シラカバの木の加護",
+  "effect.potionmorepotion.stone_blessing": "石の加護",
+  "effect.potionmorepotion.cobblestone_blessing": "丸石の加護",
+
+  "item.minecraft.potion.effect.oak_blessing": "オークの木の加護のポーション",
+  "item.minecraft.splash_potion.effect.oak_blessing": "スプラッシュ・オークの木の加護のポーション",
+  "item.minecraft.lingering_potion.effect.oak_blessing": "残留のオークの木の加護のポーション",
+  "item.minecraft.tipped_arrow.effect.oak_blessing": "オークの木の加護の矢",
+
+  "item.minecraft.potion.effect.birch_blessing": "シラカバの木の加護のポーション",
+  "item.minecraft.splash_potion.effect.birch_blessing": "スプラッシュ・シラカバの木の加護のポーション",
+  "item.minecraft.lingering_potion.effect.birch_blessing": "残留のシラカバの木の加護のポーション",
+  "item.minecraft.tipped_arrow.effect.birch_blessing": "シラカバの木の加護の矢",
+
+  "item.minecraft.potion.effect.stone_blessing": "石の加護のポーション",
+  "item.minecraft.splash_potion.effect.stone_blessing": "スプラッシュ・石の加護のポーション",
+  "item.minecraft.lingering_potion.effect.stone_blessing": "残留の石の加護のポーション",
+  "item.minecraft.tipped_arrow.effect.stone_blessing": "石の加護の矢",
+
+  "item.minecraft.potion.effect.cobblestone_blessing": "丸石の加護のポーション",
+  "item.minecraft.splash_potion.effect.cobblestone_blessing": "スプラッシュ・丸石の加護のポーション",
+  "item.minecraft.lingering_potion.effect.cobblestone_blessing": "残留の丸石の加護のポーション",
+  "item.minecraft.tipped_arrow.effect.cobblestone_blessing": "丸石の加護の矢",
+
+  "effect.potionmorepotion.deepslate_blessing": "深層岩の加護",
+  "effect.potionmorepotion.cobbled_deepslate_blessing": "深層岩の丸石の加護",
+
+  "item.minecraft.potion.effect.deepslate_blessing": "深層岩の加護のポーション",
+  "item.minecraft.splash_potion.effect.deepslate_blessing": "スプラッシュ・深層岩の加護のポーション",
+  "item.minecraft.lingering_potion.effect.deepslate_blessing": "残留の深層岩の加護のポーション",
+  "item.minecraft.tipped_arrow.effect.deepslate_blessing": "深層岩の加護の矢",
+
+  "item.minecraft.potion.effect.cobbled_deepslate_blessing": "深層岩の丸石の加護のポーション",
+  "item.minecraft.splash_potion.effect.cobbled_deepslate_blessing": "スプラッシュ・深層岩の丸石の加護のポーション",
+  "item.minecraft.lingering_potion.effect.cobbled_deepslate_blessing": "残留の深層岩の丸石の加護のポーション",
+  "item.minecraft.tipped_arrow.effect.cobbled_deepslate_blessing": "深層岩の丸石の加護の矢"
+}
