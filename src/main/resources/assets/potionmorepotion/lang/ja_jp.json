@@ -53,5 +53,11 @@
   "item.minecraft.potion.effect.snowball_blessing": "雪玉の加護のポーション",
   "item.minecraft.splash_potion.effect.snowball_blessing": "スプラッシュ・雪玉の加護のポーション",
   "item.minecraft.lingering_potion.effect.snowball_blessing": "残留の雪玉の加護のポーション",
-  "item.minecraft.tipped_arrow.effect.snowball_blessing": "雪玉の加護の矢"
+  "item.minecraft.tipped_arrow.effect.snowball_blessing": "雪玉の加護の矢",
+
+  "effect.potionmorepotion.arrow_blessing": "矢の加護",
+  "item.minecraft.potion.effect.arrow_blessing": "矢の加護のポーション",
+  "item.minecraft.splash_potion.effect.arrow_blessing": "スプラッシュ・矢の加護のポーション",
+  "item.minecraft.lingering_potion.effect.arrow_blessing": "残留の矢の加護のポーション",
+  "item.minecraft.tipped_arrow.effect.arrow_blessing": "矢の加護の矢"
 }

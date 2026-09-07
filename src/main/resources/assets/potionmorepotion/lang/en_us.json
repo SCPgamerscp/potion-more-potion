@@ -53,5 +53,11 @@
   "item.minecraft.potion.effect.snowball_blessing": "Potion of the Snowball Blessing",
   "item.minecraft.splash_potion.effect.snowball_blessing": "Splash Potion of the Snowball Blessing",
   "item.minecraft.lingering_potion.effect.snowball_blessing": "Lingering Potion of the Snowball Blessing",
-  "item.minecraft.tipped_arrow.effect.snowball_blessing": "Arrow of the Snowball Blessing"
+  "item.minecraft.tipped_arrow.effect.snowball_blessing": "Arrow of the Snowball Blessing",
+
+  "effect.potionmorepotion.arrow_blessing": "Blessing of the Arrow",
+  "item.minecraft.potion.effect.arrow_blessing": "Potion of the Arrow Blessing",
+  "item.minecraft.splash_potion.effect.arrow_blessing": "Splash Potion of the Arrow Blessing",
+  "item.minecraft.lingering_potion.effect.arrow_blessing": "Lingering Potion of the Arrow Blessing",
+  "item.minecraft.tipped_arrow.effect.arrow_blessing": "Arrow of the Arrow Blessing"
 }
