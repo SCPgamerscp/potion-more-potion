@@ -53,13 +53,9 @@ public class SnowballBlessingHandler {
             return;
         }
 
-        // Check if player is using items with action (e.g. shield blocking, bow, food)
-        if (player.isUsingItem()) {
-            ItemStack usingItem = player.getUseItem();
-            UseAnim anim = usingItem.getUseAnimation();
-            if (anim != UseAnim.NONE) {
-                return;
-            }
+        // Check if breath should be suppressed (block placement, chest/door/crafting table interactions, shield/bow/food)
+        if (com.ecrea.potionmorepotion.util.BlessingInteractionHelper.shouldSuppressBreath(mc, player)) {
+            return;
         }
 
         // Send breath packet to server
