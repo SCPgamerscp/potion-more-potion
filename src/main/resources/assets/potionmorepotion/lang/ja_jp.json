@@ -35,5 +35,11 @@
   "item.minecraft.potion.effect.cobbled_deepslate_blessing": "深層岩の丸石の加護のポーション",
   "item.minecraft.splash_potion.effect.cobbled_deepslate_blessing": "スプラッシュ・深層岩の丸石の加護のポーション",
   "item.minecraft.lingering_potion.effect.cobbled_deepslate_blessing": "残留の深層岩の丸石の加護のポーション",
-  "item.minecraft.tipped_arrow.effect.cobbled_deepslate_blessing": "深層岩の丸石の加護の矢"
+  "item.minecraft.tipped_arrow.effect.cobbled_deepslate_blessing": "深層岩の丸石の加護の矢",
+
+  "effect.potionmorepotion.ender_pearl_blessing": "エンダーパールの加護",
+  "item.minecraft.potion.effect.ender_pearl_blessing": "エンダーパールの加護のポーション",
+  "item.minecraft.splash_potion.effect.ender_pearl_blessing": "スプラッシュ・エンダーパールの加護のポーション",
+  "item.minecraft.lingering_potion.effect.ender_pearl_blessing": "残留のエンダーパールの加護のポーション",
+  "item.minecraft.tipped_arrow.effect.ender_pearl_blessing": "エンダーパールの加護の矢"
 }

@@ -35,5 +35,11 @@
   "item.minecraft.potion.effect.cobbled_deepslate_blessing": "Potion of the Cobbled Deepslate Blessing",
   "item.minecraft.splash_potion.effect.cobbled_deepslate_blessing": "Splash Potion of the Cobbled Deepslate Blessing",
   "item.minecraft.lingering_potion.effect.cobbled_deepslate_blessing": "Lingering Potion of the Cobbled Deepslate Blessing",
-  "item.minecraft.tipped_arrow.effect.cobbled_deepslate_blessing": "Arrow of the Cobbled Deepslate Blessing"
+  "item.minecraft.tipped_arrow.effect.cobbled_deepslate_blessing": "Arrow of the Cobbled Deepslate Blessing",
+
+  "effect.potionmorepotion.ender_pearl_blessing": "Blessing of the Ender Pearl",
+  "item.minecraft.potion.effect.ender_pearl_blessing": "Potion of the Ender Pearl Blessing",
+  "item.minecraft.splash_potion.effect.ender_pearl_blessing": "Splash Potion of the Ender Pearl Blessing",
+  "item.minecraft.lingering_potion.effect.ender_pearl_blessing": "Lingering Potion of the Ender Pearl Blessing",
+  "item.minecraft.tipped_arrow.effect.ender_pearl_blessing": "Arrow of the Ender Pearl Blessing"
 }
