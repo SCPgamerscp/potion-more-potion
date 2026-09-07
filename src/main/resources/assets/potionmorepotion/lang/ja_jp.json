@@ -41,5 +41,11 @@
   "item.minecraft.potion.effect.ender_pearl_blessing": "エンダーパールの加護のポーション",
   "item.minecraft.splash_potion.effect.ender_pearl_blessing": "スプラッシュ・エンダーパールの加護のポーション",
   "item.minecraft.lingering_potion.effect.ender_pearl_blessing": "残留のエンダーパールの加護のポーション",
-  "item.minecraft.tipped_arrow.effect.ender_pearl_blessing": "エンダーパールの加護の矢"
+  "item.minecraft.tipped_arrow.effect.ender_pearl_blessing": "エンダーパールの加護の矢",
+
+  "effect.potionmorepotion.fire_charge_blessing": "ファイヤーチャージの加護",
+  "item.minecraft.potion.effect.fire_charge_blessing": "ファイヤーチャージの加護のポーション",
+  "item.minecraft.splash_potion.effect.fire_charge_blessing": "スプラッシュ・ファイヤーチャージの加護のポーション",
+  "item.minecraft.lingering_potion.effect.fire_charge_blessing": "残留のファイヤーチャージの加護のポーション",
+  "item.minecraft.tipped_arrow.effect.fire_charge_blessing": "ファイヤーチャージの加護の矢"
 }

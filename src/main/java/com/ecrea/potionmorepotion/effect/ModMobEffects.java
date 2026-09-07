@@ -38,6 +38,7 @@ public class ModMobEffects {
         register("deepslate_blessing", 0x3A3D42, () -> Items.DEEPSLATE, () -> Items.DEEPSLATE);
         register("cobbled_deepslate_blessing", 0x27282B, () -> Items.COBBLED_DEEPSLATE, () -> Items.COBBLED_DEEPSLATE);
         register("ender_pearl_blessing", 0x167C74, () -> Items.ENDER_PEARL, () -> Items.ENDER_PEARL);
+        register("fire_charge_blessing", 0xE25822, () -> Items.FIRE_CHARGE, () -> Items.FIRE_CHARGE);
     }
 
     private static void register(String id, int color, Supplier<Item> iconItem, Supplier<Item> brewingIngredient) {

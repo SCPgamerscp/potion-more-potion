@@ -28,6 +28,8 @@ public class ModEventBusEvents {
 
     public static void onCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
+            com.ecrea.potionmorepotion.network.ModMessages.register();
+
             for (BlessingDefinition definition : ModMobEffects.DEFINITIONS.values()) {
                 BrewingRecipeRegistry.addRecipe(
                         StrictNBTIngredient.of(

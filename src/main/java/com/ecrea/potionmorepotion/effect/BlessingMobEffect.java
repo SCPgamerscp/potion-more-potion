@@ -46,6 +46,12 @@ public class BlessingMobEffect extends MobEffect {
     public void applyEffectTick(LivingEntity entity, int amplifier) {
         if (!entity.level().isClientSide) {
             entity.heal(Config.healAmount);
+
+            if ("fire_charge_blessing".equals(definition.id())) {
+                entity.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                        net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE,
+                        40, 0, false, false, true));
+            }
         }
     }
 

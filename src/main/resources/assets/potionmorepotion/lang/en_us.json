@@ -41,5 +41,11 @@
   "item.minecraft.potion.effect.ender_pearl_blessing": "Potion of the Ender Pearl Blessing",
   "item.minecraft.splash_potion.effect.ender_pearl_blessing": "Splash Potion of the Ender Pearl Blessing",
   "item.minecraft.lingering_potion.effect.ender_pearl_blessing": "Lingering Potion of the Ender Pearl Blessing",
-  "item.minecraft.tipped_arrow.effect.ender_pearl_blessing": "Arrow of the Ender Pearl Blessing"
+  "item.minecraft.tipped_arrow.effect.ender_pearl_blessing": "Arrow of the Ender Pearl Blessing",
+
+  "effect.potionmorepotion.fire_charge_blessing": "Blessing of the Fire Charge",
+  "item.minecraft.potion.effect.fire_charge_blessing": "Potion of the Fire Charge Blessing",
+  "item.minecraft.splash_potion.effect.fire_charge_blessing": "Splash Potion of the Fire Charge Blessing",
+  "item.minecraft.lingering_potion.effect.fire_charge_blessing": "Lingering Potion of the Fire Charge Blessing",
+  "item.minecraft.tipped_arrow.effect.fire_charge_blessing": "Arrow of the Fire Charge Blessing"
 }
