@@ -70,13 +70,17 @@ public class FireChargeBlessingHandler {
         double spawnY = player.getEyeY() - 0.15 + forward.y * 0.6;
         double spawnZ = player.getZ() + forward.z * 0.6;
 
-        float spread = 0.15F;
-        double dx = forward.x + (random.nextDouble() - 0.5) * spread;
-        double dy = forward.y + (random.nextDouble() - 0.5) * spread;
-        double dz = forward.z + (random.nextDouble() - 0.5) * spread;
-
-        player.level().addParticle(ParticleTypes.FLAME, spawnX, spawnY, spawnZ, dx * 0.3, dy * 0.3, dz * 0.3);
-        if (random.nextInt(3) == 0) {
+        float spread = 0.20F;
+        for (int i = 0; i < 2; i++) {
+            double dx = forward.x + (random.nextDouble() - 0.5) * spread;
+            double dy = forward.y + (random.nextDouble() - 0.5) * spread;
+            double dz = forward.z + (random.nextDouble() - 0.5) * spread;
+            player.level().addParticle(ParticleTypes.FLAME, spawnX, spawnY, spawnZ, dx * 0.3, dy * 0.3, dz * 0.3);
+        }
+        if (random.nextBoolean()) {
+            double dx = forward.x + (random.nextDouble() - 0.5) * spread;
+            double dy = forward.y + (random.nextDouble() - 0.5) * spread;
+            double dz = forward.z + (random.nextDouble() - 0.5) * spread;
             player.level().addParticle(ParticleTypes.SMOKE, spawnX, spawnY, spawnZ, dx * 0.15, dy * 0.15, dz * 0.15);
         }
     }

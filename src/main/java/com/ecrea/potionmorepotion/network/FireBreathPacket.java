@@ -56,13 +56,6 @@ public class FireBreathPacket {
             ServerLevel level = player.serverLevel();
             RandomSource random = level.getRandom();
 
-            // Calculate 3D conical (cone) spread relative to player's look angle
-            float spread = 0.18F; // Cone radius
-            double angle = random.nextDouble() * 2.0 * Math.PI;
-            double radius = Math.sqrt(random.nextDouble()) * spread;
-            double dx = Math.cos(angle) * radius;
-            double dy = Math.sin(angle) * radius;
-
             Vec3 forward = player.getLookAngle().normalize();
             Vec3 up = new Vec3(0, 1, 0);
             Vec3 right = forward.cross(up).normalize();
@@ -71,25 +64,37 @@ public class FireBreathPacket {
             }
             Vec3 trueUp = right.cross(forward).normalize();
 
-            Vec3 dir = forward.add(right.scale(dx)).add(trueUp.scale(dy)).normalize();
+            float spread = 0.20F; // Cone radius
+            double speed = 0.85;
 
-            // Spawn SmallFireball with acceleration along the conical direction
-            double speed = 0.8;
-            SmallFireball fireball = new SmallFireball(level, player, dir.x * speed, dir.y * speed, dir.z * speed);
-            double spawnX = player.getX() + forward.x * 0.7;
-            double spawnY = player.getEyeY() - 0.15 + forward.y * 0.7;
-            double spawnZ = player.getZ() + forward.z * 0.7;
-            fireball.setPos(spawnX, spawnY, spawnZ);
-            level.addFreshEntity(fireball);
+            // Spawn 3 fireballs per tick in conical spread
+            for (int i = 0; i < 3; i++) {
+                double angle = random.nextDouble() * 2.0 * Math.PI;
+                double radius = Math.sqrt(random.nextDouble()) * spread;
+                double dx = Math.cos(angle) * radius;
+                double dy = Math.sin(angle) * radius;
+
+                Vec3 dir = forward.add(right.scale(dx)).add(trueUp.scale(dy)).normalize();
+
+                SmallFireball fireball = new SmallFireball(level, player, dir.x * speed, dir.y * speed, dir.z * speed);
+                double spawnX = player.getX() + forward.x * 0.7;
+                double spawnY = player.getEyeY() - 0.15 + forward.y * 0.7;
+                double spawnZ = player.getZ() + forward.z * 0.7;
+                fireball.setPos(spawnX, spawnY, spawnZ);
+                level.addFreshEntity(fireball);
+            }
 
             // Audio & particles
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS,
                     0.25F, 1.1F + (random.nextFloat() - random.nextFloat()) * 0.2F);
 
+            double spawnX = player.getX() + forward.x * 0.7;
+            double spawnY = player.getEyeY() - 0.15 + forward.y * 0.7;
+            double spawnZ = player.getZ() + forward.z * 0.7;
             level.sendParticles(ParticleTypes.FLAME,
                     spawnX, spawnY, spawnZ,
-                    2, dir.x * 0.2, dir.y * 0.2, dir.z * 0.2, 0.05);
+                    4, forward.x * 0.2, forward.y * 0.2, forward.z * 0.2, 0.08);
         });
 
         return true;
