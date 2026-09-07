@@ -67,6 +67,8 @@ public class FireBreathPacket {
             float spread = 0.20F; // Cone radius
             double speed = 0.85;
 
+            boolean isSneaking = player.isShiftKeyDown() || player.isCrouching();
+
             // Spawn 3 fireballs per tick in conical spread
             for (int i = 0; i < 3; i++) {
                 double angle = random.nextDouble() * 2.0 * Math.PI;
@@ -77,6 +79,9 @@ public class FireBreathPacket {
                 Vec3 dir = forward.add(right.scale(dx)).add(trueUp.scale(dy)).normalize();
 
                 SmallFireball fireball = new SmallFireball(level, player, dir.x * speed, dir.y * speed, dir.z * speed);
+                if (isSneaking) {
+                    fireball.addTag("no_block_fire");
+                }
                 double spawnX = player.getX() + forward.x * 0.7;
                 double spawnY = player.getEyeY() - 0.15 + forward.y * 0.7;
                 double spawnZ = player.getZ() + forward.z * 0.7;
