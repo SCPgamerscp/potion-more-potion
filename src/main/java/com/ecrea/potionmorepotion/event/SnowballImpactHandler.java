@@ -33,8 +33,8 @@ public class SnowballImpactHandler {
                         // 6.0 damage (3 hearts)
                         target.hurt(damageSource, 6.0F);
 
-                        // 20 seconds (400 ticks) powder snow freeze
-                        target.setTicksFrozen(400);
+                        // 20 seconds (400 game ticks) of full freeze (thaw rate is 2 ticks/tick, threshold 140: 140 + 400*2 = 940)
+                        target.setTicksFrozen(940);
 
                         // 20 seconds (400 ticks) Slowness V (amplifier 4)
                         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 400, 4));
