@@ -47,5 +47,11 @@
   "item.minecraft.potion.effect.fire_charge_blessing": "Potion of the Fire Charge Blessing",
   "item.minecraft.splash_potion.effect.fire_charge_blessing": "Splash Potion of the Fire Charge Blessing",
   "item.minecraft.lingering_potion.effect.fire_charge_blessing": "Lingering Potion of the Fire Charge Blessing",
-  "item.minecraft.tipped_arrow.effect.fire_charge_blessing": "Arrow of the Fire Charge Blessing"
+  "item.minecraft.tipped_arrow.effect.fire_charge_blessing": "Arrow of the Fire Charge Blessing",
+
+  "effect.potionmorepotion.snowball_blessing": "Blessing of the Snowball",
+  "item.minecraft.potion.effect.snowball_blessing": "Potion of the Snowball Blessing",
+  "item.minecraft.splash_potion.effect.snowball_blessing": "Splash Potion of the Snowball Blessing",
+  "item.minecraft.lingering_potion.effect.snowball_blessing": "Lingering Potion of the Snowball Blessing",
+  "item.minecraft.tipped_arrow.effect.snowball_blessing": "Arrow of the Snowball Blessing"
 }

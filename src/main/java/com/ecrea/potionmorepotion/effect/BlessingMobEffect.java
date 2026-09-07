@@ -52,6 +52,10 @@ public class BlessingMobEffect extends MobEffect {
                         net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE,
                         40, 0, false, false, true));
             }
+
+            if ("snowball_blessing".equals(definition.id())) {
+                entity.setTicksFrozen(0);
+            }
         }
     }
 

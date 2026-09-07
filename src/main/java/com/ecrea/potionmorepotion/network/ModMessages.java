@@ -30,6 +30,12 @@ public class ModMessages {
                 .encoder(FireBreathPacket::toBytes)
                 .consumerMainThread(FireBreathPacket::handle)
                 .add();
+
+        net.messageBuilder(SnowballBreathPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(SnowballBreathPacket::new)
+                .encoder(SnowballBreathPacket::toBytes)
+                .consumerMainThread(SnowballBreathPacket::handle)
+                .add();
     }
 
     public static <MSG> void sendToServer(MSG message) {

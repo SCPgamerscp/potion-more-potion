@@ -19,8 +19,31 @@ import net.minecraftforge.fml.common.Mod;
 public class BlessingDamageHandler {
 
     @SubscribeEvent
+    public static void onLivingTick(net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent event) {
+        LivingEntity entity = event.getEntity();
+        if (entity.level().isClientSide) {
+            return;
+        }
+
+        var snowballObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("snowball_blessing");
+        if (snowballObj != null && entity.hasEffect(snowballObj.get())) {
+            if (entity.getTicksFrozen() > 0) {
+                entity.setTicksFrozen(0);
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
         LivingEntity entity = event.getEntity();
+
+        var snowballObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("snowball_blessing");
+        if (snowballObj != null && entity.hasEffect(snowballObj.get())) {
+            if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.FREEZE)) {
+                event.setCanceled(true);
+                return;
+            }
+        }
 
         int blessingCount = 0;
         for (MobEffectInstance instance : entity.getActiveEffects()) {
