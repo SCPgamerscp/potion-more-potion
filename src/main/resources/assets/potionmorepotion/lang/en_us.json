@@ -59,5 +59,17 @@
   "item.minecraft.potion.effect.arrow_blessing": "Potion of the Arrow Blessing",
   "item.minecraft.splash_potion.effect.arrow_blessing": "Splash Potion of the Arrow Blessing",
   "item.minecraft.lingering_potion.effect.arrow_blessing": "Lingering Potion of the Arrow Blessing",
-  "item.minecraft.tipped_arrow.effect.arrow_blessing": "Arrow of the Arrow Blessing"
+  "item.minecraft.tipped_arrow.effect.arrow_blessing": "Arrow of the Arrow Blessing",
+
+  "effect.potionmorepotion.potion_blessing": "Blessing of the Potion",
+  "item.minecraft.potion.effect.potion_blessing": "Potion of the Potion Blessing",
+  "item.minecraft.splash_potion.effect.potion_blessing": "Splash Potion of the Potion Blessing",
+  "item.minecraft.lingering_potion.effect.potion_blessing": "Lingering Potion of the Potion Blessing",
+  "item.minecraft.tipped_arrow.effect.potion_blessing": "Arrow of the Potion Blessing",
+
+  "effect.potionmorepotion.ender_dragon_blessing": "Blessing of the Ender Dragon",
+  "item.minecraft.potion.effect.ender_dragon_blessing": "Potion of the Ender Dragon Blessing",
+  "item.minecraft.splash_potion.effect.ender_dragon_blessing": "Splash Potion of the Ender Dragon Blessing",
+  "item.minecraft.lingering_potion.effect.ender_dragon_blessing": "Lingering Potion of the Ender Dragon Blessing",
+  "item.minecraft.tipped_arrow.effect.ender_dragon_blessing": "Arrow of the Ender Dragon Blessing"
 }

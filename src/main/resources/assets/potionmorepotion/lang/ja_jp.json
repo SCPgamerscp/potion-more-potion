@@ -59,5 +59,17 @@
   "item.minecraft.potion.effect.arrow_blessing": "矢の加護のポーション",
   "item.minecraft.splash_potion.effect.arrow_blessing": "スプラッシュ・矢の加護のポーション",
   "item.minecraft.lingering_potion.effect.arrow_blessing": "残留の矢の加護のポーション",
-  "item.minecraft.tipped_arrow.effect.arrow_blessing": "矢の加護の矢"
+  "item.minecraft.tipped_arrow.effect.arrow_blessing": "矢の加護の矢",
+
+  "effect.potionmorepotion.potion_blessing": "ポーションの加護",
+  "item.minecraft.potion.effect.potion_blessing": "ポーションの加護のポーション",
+  "item.minecraft.splash_potion.effect.potion_blessing": "スプラッシュ・ポーションの加護のポーション",
+  "item.minecraft.lingering_potion.effect.potion_blessing": "残留のポーションの加護のポーション",
+  "item.minecraft.tipped_arrow.effect.potion_blessing": "ポーションの加護の矢",
+
+  "effect.potionmorepotion.ender_dragon_blessing": "エンダードラゴンの加護",
+  "item.minecraft.potion.effect.ender_dragon_blessing": "エンダードラゴンの加護のポーション",
+  "item.minecraft.splash_potion.effect.ender_dragon_blessing": "スプラッシュ・エンダードラゴンの加護のポーション",
+  "item.minecraft.lingering_potion.effect.ender_dragon_blessing": "残留のエンダードラゴンの加護のポーション",
+  "item.minecraft.tipped_arrow.effect.ender_dragon_blessing": "エンダードラゴンの加護の矢"
 }

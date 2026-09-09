@@ -36,6 +36,18 @@ public class ModMessages {
                 .encoder(SnowballBreathPacket::toBytes)
                 .consumerMainThread(SnowballBreathPacket::handle)
                 .add();
+
+        net.messageBuilder(PotionBreathPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(PotionBreathPacket::new)
+                .encoder(PotionBreathPacket::toBytes)
+                .consumerMainThread(PotionBreathPacket::handle)
+                .add();
+
+        net.messageBuilder(DragonBreathPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(DragonBreathPacket::new)
+                .encoder(DragonBreathPacket::toBytes)
+                .consumerMainThread(DragonBreathPacket::handle)
+                .add();
     }
 
     public static <MSG> void sendToServer(MSG message) {

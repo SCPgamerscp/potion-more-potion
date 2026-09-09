@@ -45,6 +45,24 @@ public class BlessingDamageHandler {
             }
         }
 
+        var dragonObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("ender_dragon_blessing");
+        if (dragonObj != null && entity.hasEffect(dragonObj.get())) {
+            if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.DRAGON_BREATH)) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+
+        var potionObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("potion_blessing");
+        if (potionObj != null && entity.hasEffect(potionObj.get())) {
+            if (event.getSource().getEntity() == entity &&
+                    (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC) ||
+                     event.getSource().is(net.minecraft.world.damagesource.DamageTypes.MAGIC))) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+
         int blessingCount = 0;
         for (MobEffectInstance instance : entity.getActiveEffects()) {
             if (instance.getEffect() instanceof BlessingMobEffect) {

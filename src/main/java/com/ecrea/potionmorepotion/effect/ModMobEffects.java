@@ -41,6 +41,8 @@ public class ModMobEffects {
         register("fire_charge_blessing", 0xE25822, () -> Items.FIRE_CHARGE, () -> Items.FIRE_CHARGE);
         register("snowball_blessing", 0xA0D8EF, () -> Items.SNOWBALL, () -> Items.SNOWBALL);
         register("arrow_blessing", 0xC0C0C0, () -> Items.ARROW, () -> Items.ARROW);
+        register("potion_blessing", 0x9B59B6, () -> Items.NETHER_WART_BLOCK, () -> Items.NETHER_WART_BLOCK);
+        register("ender_dragon_blessing", 0x4A154B, () -> Items.END_CRYSTAL, () -> Items.END_CRYSTAL);
     }
 
     private static void register(String id, int color, Supplier<Item> iconItem, Supplier<Item> brewingIngredient) {
