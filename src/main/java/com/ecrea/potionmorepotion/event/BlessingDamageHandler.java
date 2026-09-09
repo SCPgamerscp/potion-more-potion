@@ -3,29 +3,43 @@ package com.ecrea.potionmorepotion.event;
 import com.ecrea.potionmorepotion.Config;
 import com.ecrea.potionmorepotion.PotionMorePotionMod;
 import com.ecrea.potionmorepotion.effect.BlessingMobEffect;
+import com.ecrea.potionmorepotion.effect.ModMobEffects;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.DragonFireball;
+import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * Applies "50% damage reduction" per active blessing effect to ALL entities (not just players),
- * for every damage source (melee, fall, fire, drown, poison, etc). This is independent from and
- * stacks multiplicatively with vanilla Resistance, since it is not implemented as an attribute
- * modifier or as vanilla Resistance amplification.
+ * Handles damage immunity and reduction for blessing effects:
+ * - Snowball Blessing: Immune to freezing.
+ * - Ender Dragon Blessing: Completely immune (like vanilla Fire Resistance) to self-inflicted
+ *   dragon fireballs, explosions, dragon breath, and lingering purple clouds (harm magic).
+ * - Potion Blessing: Completely immune (like vanilla Fire Resistance) to self-inflicted
+ *   splash potions of harm (indirect magic).
+ * - 50% damage reduction for all active blessings against other external damage sources.
  */
 @Mod.EventBusSubscriber(modid = PotionMorePotionMod.MOD_ID)
 public class BlessingDamageHandler {
 
     @SubscribeEvent
-    public static void onLivingTick(net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent event) {
+    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
         if (entity.level().isClientSide) {
             return;
         }
 
-        var snowballObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("snowball_blessing");
+        var snowballObj = ModMobEffects.EFFECTS.get("snowball_blessing");
         if (snowballObj != null && entity.hasEffect(snowballObj.get())) {
             if (entity.getTicksFrozen() > 0) {
                 entity.setTicksFrozen(0);
@@ -33,31 +47,81 @@ public class BlessingDamageHandler {
         }
     }
 
+    /**
+     * Cancels damage BEFORE hurt logic (hurtTime, hurt animation, red flash, sound, knockback) runs,
+     * achieving the exact same effect as vanilla Fire Resistance.
+     */
     @SubscribeEvent
-    public static void onLivingAttack(net.minecraftforge.event.entity.living.LivingAttackEvent event) {
+    public static void onLivingAttack(LivingAttackEvent event) {
         LivingEntity entity = event.getEntity();
+        DamageSource source = event.getSource();
 
-        var snowballObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("snowball_blessing");
+        // 1. Snowball Blessing: immune to freeze damage
+        var snowballObj = ModMobEffects.EFFECTS.get("snowball_blessing");
         if (snowballObj != null && entity.hasEffect(snowballObj.get())) {
-            if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.FREEZE)) {
+            if (source.is(DamageTypes.FREEZE)) {
                 event.setCanceled(true);
                 return;
             }
         }
 
-        var dragonObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("ender_dragon_blessing");
+        // 2. Ender Dragon Blessing: completely immune like Fire Resistance to:
+        //    - Dragon breath
+        //    - Self-fired dragon fireballs (direct hits or explosions)
+        //    - Self-fired area effect clouds (dragon breath purple clouds / harm)
+        var dragonObj = ModMobEffects.EFFECTS.get("ender_dragon_blessing");
         if (dragonObj != null && entity.hasEffect(dragonObj.get())) {
-            if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.DRAGON_BREATH)) {
+            // Dragon breath damage type
+            if (source.is(DamageTypes.DRAGON_BREATH)) {
                 event.setCanceled(true);
                 return;
             }
+
+            // Dragon Fireball direct hit or explosion from self
+            if (source.getDirectEntity() instanceof DragonFireball dfb) {
+                if (dfb.getOwner() == entity || dfb.getOwner() == null) {
+                    event.setCanceled(true);
+                    return;
+                }
+            }
+
+            // AreaEffectCloud created by dragon fireballs
+            if (source.getDirectEntity() instanceof AreaEffectCloud cloud) {
+                if (cloud.getOwner() == entity || cloud.getParticle().getType() == ParticleTypes.DRAGON_BREATH) {
+                    event.setCanceled(true);
+                    return;
+                }
+            }
+
+            // Self-inflicted explosions or magic (from dragon fireball impact & clouds)
+            if (source.getEntity() == entity) {
+                if (source.is(DamageTypes.EXPLOSION) ||
+                    source.is(DamageTypes.PLAYER_EXPLOSION) ||
+                    source.is(DamageTypes.INDIRECT_MAGIC) ||
+                    source.is(DamageTypes.MAGIC)) {
+                    event.setCanceled(true);
+                    return;
+                }
+            }
         }
 
-        var potionObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("potion_blessing");
+        // 3. Potion Blessing: completely immune like Fire Resistance to:
+        //    - Self-thrown splash potions (harming II)
+        //    - Indirect magic / magic where attacker is self
+        var potionObj = ModMobEffects.EFFECTS.get("potion_blessing");
         if (potionObj != null && entity.hasEffect(potionObj.get())) {
-            if (event.getSource().getEntity() == entity &&
-                    (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC) ||
-                     event.getSource().is(net.minecraft.world.damagesource.DamageTypes.MAGIC))) {
+            // Direct projectile was a ThrownPotion thrown by player
+            if (source.getDirectEntity() instanceof ThrownPotion potion) {
+                if (potion.getOwner() == entity || potion.getOwner() == null) {
+                    event.setCanceled(true);
+                    return;
+                }
+            }
+
+            // Self-inflicted magic / indirect magic
+            if (source.getEntity() == entity &&
+                    (source.is(DamageTypes.INDIRECT_MAGIC) ||
+                     source.is(DamageTypes.MAGIC))) {
                 event.setCanceled(true);
                 return;
             }
@@ -65,11 +129,11 @@ public class BlessingDamageHandler {
     }
 
     @SubscribeEvent
-    public static void onExplosionDetonate(net.minecraftforge.event.level.ExplosionEvent.Detonate event) {
-        // Protect players with ender_dragon_blessing from explosion knockback caused by dragon fireballs
+    public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
+        // Protect players with ender_dragon_blessing from explosion knockback/damage caused by dragon fireballs
         event.getAffectedEntities().removeIf(e -> {
             if (e instanceof LivingEntity living) {
-                var dragonObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("ender_dragon_blessing");
+                var dragonObj = ModMobEffects.EFFECTS.get("ender_dragon_blessing");
                 return dragonObj != null && living.hasEffect(dragonObj.get());
             }
             return false;
@@ -77,10 +141,10 @@ public class BlessingDamageHandler {
     }
 
     @SubscribeEvent
-    public static void onLivingKnockBack(net.minecraftforge.event.entity.living.LivingKnockBackEvent event) {
+    public static void onLivingKnockBack(LivingKnockBackEvent event) {
         LivingEntity entity = event.getEntity();
-        var potionObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("potion_blessing");
-        var dragonObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("ender_dragon_blessing");
+        var potionObj = ModMobEffects.EFFECTS.get("potion_blessing");
+        var dragonObj = ModMobEffects.EFFECTS.get("ender_dragon_blessing");
 
         // Cancel knockback if player has potion or dragon blessing and damage was self-inflicted
         if ((potionObj != null && entity.hasEffect(potionObj.get())) ||
@@ -94,33 +158,56 @@ public class BlessingDamageHandler {
     @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
         LivingEntity entity = event.getEntity();
+        DamageSource source = event.getSource();
 
-        var snowballObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("snowball_blessing");
+        // Safety fallback: ensure complete cancellation for any hurt event that might bypass attack event
+        var snowballObj = ModMobEffects.EFFECTS.get("snowball_blessing");
         if (snowballObj != null && entity.hasEffect(snowballObj.get())) {
-            if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.FREEZE)) {
+            if (source.is(DamageTypes.FREEZE)) {
                 event.setCanceled(true);
                 return;
             }
         }
 
-        var dragonObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("ender_dragon_blessing");
+        var dragonObj = ModMobEffects.EFFECTS.get("ender_dragon_blessing");
         if (dragonObj != null && entity.hasEffect(dragonObj.get())) {
-            if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.DRAGON_BREATH)) {
+            if (source.is(DamageTypes.DRAGON_BREATH)) {
+                event.setCanceled(true);
+                return;
+            }
+            if (source.getDirectEntity() instanceof DragonFireball dfb && (dfb.getOwner() == entity || dfb.getOwner() == null)) {
+                event.setCanceled(true);
+                return;
+            }
+            if (source.getDirectEntity() instanceof AreaEffectCloud cloud && (cloud.getOwner() == entity || cloud.getParticle().getType() == ParticleTypes.DRAGON_BREATH)) {
+                event.setCanceled(true);
+                return;
+            }
+            if (source.getEntity() == entity &&
+                    (source.is(DamageTypes.EXPLOSION) ||
+                     source.is(DamageTypes.PLAYER_EXPLOSION) ||
+                     source.is(DamageTypes.INDIRECT_MAGIC) ||
+                     source.is(DamageTypes.MAGIC))) {
                 event.setCanceled(true);
                 return;
             }
         }
 
-        var potionObj = com.ecrea.potionmorepotion.effect.ModMobEffects.EFFECTS.get("potion_blessing");
+        var potionObj = ModMobEffects.EFFECTS.get("potion_blessing");
         if (potionObj != null && entity.hasEffect(potionObj.get())) {
-            if (event.getSource().getEntity() == entity &&
-                    (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC) ||
-                     event.getSource().is(net.minecraft.world.damagesource.DamageTypes.MAGIC))) {
+            if (source.getDirectEntity() instanceof ThrownPotion potion && (potion.getOwner() == entity || potion.getOwner() == null)) {
+                event.setCanceled(true);
+                return;
+            }
+            if (source.getEntity() == entity &&
+                    (source.is(DamageTypes.INDIRECT_MAGIC) ||
+                     source.is(DamageTypes.MAGIC))) {
                 event.setCanceled(true);
                 return;
             }
         }
 
+        // Apply 50% damage reduction for each active blessing
         int blessingCount = 0;
         for (MobEffectInstance instance : entity.getActiveEffects()) {
             if (instance.getEffect() instanceof BlessingMobEffect) {
