@@ -43,6 +43,7 @@ public class ModMobEffects {
         register("arrow_blessing", 0xC0C0C0, () -> Items.ARROW, () -> Items.ARROW);
         register("potion_blessing", 0x9B59B6, () -> Items.NETHER_WART_BLOCK, () -> Items.NETHER_WART_BLOCK);
         register("ender_dragon_blessing", 0x4A154B, () -> Items.END_CRYSTAL, () -> Items.END_CRYSTAL);
+        register("ignore_iframes_blessing", 0xFFA500, () -> Items.BLAZE_ROD, () -> Items.BLAZE_ROD);
     }
 
     private static void register(String id, int color, Supplier<Item> iconItem, Supplier<Item> brewingIngredient) {

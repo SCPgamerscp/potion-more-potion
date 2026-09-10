@@ -71,5 +71,11 @@
   "item.minecraft.potion.effect.ender_dragon_blessing": "Potion of the Ender Dragon Blessing",
   "item.minecraft.splash_potion.effect.ender_dragon_blessing": "Splash Potion of the Ender Dragon Blessing",
   "item.minecraft.lingering_potion.effect.ender_dragon_blessing": "Lingering Potion of the Ender Dragon Blessing",
-  "item.minecraft.tipped_arrow.effect.ender_dragon_blessing": "Arrow of the Ender Dragon Blessing"
+  "item.minecraft.tipped_arrow.effect.ender_dragon_blessing": "Arrow of the Ender Dragon Blessing",
+
+  "effect.potionmorepotion.ignore_iframes_blessing": "Blessing of Ignoring I-Frames",
+  "item.minecraft.potion.effect.ignore_iframes_blessing": "Potion of Ignoring I-Frames Blessing",
+  "item.minecraft.splash_potion.effect.ignore_iframes_blessing": "Splash Potion of Ignoring I-Frames Blessing",
+  "item.minecraft.lingering_potion.effect.ignore_iframes_blessing": "Lingering Potion of Ignoring I-Frames Blessing",
+  "item.minecraft.tipped_arrow.effect.ignore_iframes_blessing": "Arrow of Ignoring I-Frames Blessing"
 }

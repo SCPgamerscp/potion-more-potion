@@ -9,6 +9,9 @@ import net.minecraftforge.client.extensions.common.IClientMobEffectExtensions;
 
 import java.util.function.Consumer;
 
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+
 /**
  * Shared implementation for every "blessing" potion effect.
  * Heals 2 HP (configurable) every 20 ticks (once per second), regardless of hunger.
@@ -31,6 +34,13 @@ public class BlessingMobEffect extends MobEffect {
     public BlessingMobEffect(MobEffectCategory category, int color, BlessingDefinition definition) {
         super(category, color);
         this.definition = definition;
+
+        if ("ignore_iframes_blessing".equals(definition.id())) {
+            this.addAttributeModifier(Attributes.ATTACK_SPEED,
+                    "b87455d3-895c-4f76-9289-53e7f4c0a1a1",
+                    1000.0D,
+                    AttributeModifier.Operation.ADDITION);
+        }
     }
 
     public BlessingDefinition getDefinition() {

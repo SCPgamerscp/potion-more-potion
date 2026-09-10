@@ -71,5 +71,11 @@
   "item.minecraft.potion.effect.ender_dragon_blessing": "エンダードラゴンの加護のポーション",
   "item.minecraft.splash_potion.effect.ender_dragon_blessing": "スプラッシュ・エンダードラゴンの加護のポーション",
   "item.minecraft.lingering_potion.effect.ender_dragon_blessing": "残留のエンダードラゴンの加護のポーション",
-  "item.minecraft.tipped_arrow.effect.ender_dragon_blessing": "エンダードラゴンの加護の矢"
+  "item.minecraft.tipped_arrow.effect.ender_dragon_blessing": "エンダードラゴンの加護の矢",
+
+  "effect.potionmorepotion.ignore_iframes_blessing": "無敵時間無視の加護",
+  "item.minecraft.potion.effect.ignore_iframes_blessing": "無敵時間無視の加護のポーション",
+  "item.minecraft.splash_potion.effect.ignore_iframes_blessing": "スプラッシュ・無敵時間無視の加護のポーション",
+  "item.minecraft.lingering_potion.effect.ignore_iframes_blessing": "残留の無敵時間無視の加護のポーション",
+  "item.minecraft.tipped_arrow.effect.ignore_iframes_blessing": "無敵時間無視の加護の矢"
 }
