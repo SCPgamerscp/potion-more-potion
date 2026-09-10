@@ -36,6 +36,10 @@ public class IgnoreIframesDamageHandler {
             if (target instanceof LivingEntity livingTarget) {
                 livingTarget.invulnerableTime = 0;
                 livingTarget.hurtTime = 0;
+            } else if (target instanceof net.minecraftforge.entity.PartEntity<?> part &&
+                    part.getParent() instanceof LivingEntity parentLiving) {
+                parentLiving.invulnerableTime = 0;
+                parentLiving.hurtTime = 0;
             }
         }
     }

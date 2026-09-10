@@ -53,8 +53,8 @@ public class IgnoreIframesAttackHandler {
             target = entityHit.getEntity();
         }
 
-        if (target instanceof LivingEntity living && living.isAlive()) {
-            ModMessages.sendToServer(new RapidAttackPacket(living.getId()));
+        if (target != null && target.isAlive() && target.isAttackable() && target != player) {
+            ModMessages.sendToServer(new RapidAttackPacket(target.getId()));
             player.swing(InteractionHand.MAIN_HAND);
         }
     }

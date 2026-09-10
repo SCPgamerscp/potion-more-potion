@@ -43,8 +43,8 @@ public class RapidAttackPacket {
                 return;
             }
 
-            Entity rawTarget = player.serverLevel().getEntity(this.targetId);
-            if (!(rawTarget instanceof LivingEntity target) || !target.isAlive()) {
+            Entity target = player.serverLevel().getEntity(this.targetId);
+            if (target == null || !target.isAlive() || !target.isAttackable() || target == player) {
                 return;
             }
 
@@ -58,9 +58,29 @@ public class RapidAttackPacket {
                 if (!target.isAlive()) {
                     break;
                 }
-                target.invulnerableTime = 0;
+
+                // Reset invulnerableTime for direct living entities
+                if (target instanceof LivingEntity living) {
+                    living.invulnerableTime = 0;
+                }
+                // Reset invulnerableTime for multipart parent (e.g., EnderDragon)
+                if (target instanceof net.minecraftforge.entity.PartEntity<?> part &&
+                        part.getParent() instanceof LivingEntity parentLiving) {
+                    if (!parentLiving.isAlive()) {
+                        break;
+                    }
+                    parentLiving.invulnerableTime = 0;
+                }
+
                 player.attack(target);
-                target.invulnerableTime = 0;
+
+                if (target instanceof LivingEntity living) {
+                    living.invulnerableTime = 0;
+                }
+                if (target instanceof net.minecraftforge.entity.PartEntity<?> part &&
+                        part.getParent() instanceof LivingEntity parentLiving) {
+                    parentLiving.invulnerableTime = 0;
+                }
             }
         });
 
