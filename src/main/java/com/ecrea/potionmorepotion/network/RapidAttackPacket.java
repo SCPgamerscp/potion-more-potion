@@ -48,8 +48,24 @@ public class RapidAttackPacket {
                 return;
             }
 
-            // Verify distance (within 6 blocks)
-            if (player.distanceToSqr(target) > 36.0D) {
+            // Verify distance using player's actual ENTITY_REACH attribute (synchronized with commands / mods)
+            double reach = 5.0D;
+            try {
+                if (net.minecraftforge.common.ForgeMod.ENTITY_REACH.isPresent()) {
+                    reach = player.getAttributeValue(net.minecraftforge.common.ForgeMod.ENTITY_REACH.get());
+                }
+            } catch (Exception ignored) {
+            }
+            double allowedReach = reach + 3.0D;
+            double allowedReachSqr = allowedReach * allowedReach;
+
+            // Check distance to center AND distance to bounding box (crucial for big bosses like Ender Dragon)
+            net.minecraft.world.phys.Vec3 eyePos = player.getEyePosition();
+            double distCenterSqr = player.distanceToSqr(target);
+            double distAabbSqr = target.getBoundingBox().distanceToSqr(eyePos);
+            double actualDistSqr = Math.min(distCenterSqr, distAabbSqr);
+
+            if (actualDistSqr > allowedReachSqr) {
                 return;
             }
 

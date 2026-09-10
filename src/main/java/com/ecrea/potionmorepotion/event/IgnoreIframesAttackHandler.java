@@ -65,8 +65,17 @@ public class IgnoreIframesAttackHandler {
             return;
         }
 
-        // Find target entity in front of player (up to 5.0 blocks)
-        Entity target = findTargetEntity(mc, player, 5.0D);
+        // Determine reach distance from player's ENTITY_REACH attribute (synchronized with commands / mods)
+        double reach = 5.0D;
+        try {
+            if (net.minecraftforge.common.ForgeMod.ENTITY_REACH.isPresent()) {
+                reach = player.getAttributeValue(net.minecraftforge.common.ForgeMod.ENTITY_REACH.get());
+            }
+        } catch (Exception ignored) {
+        }
+
+        // Find target entity in front of player using player's actual reach distance
+        Entity target = findTargetEntity(mc, player, reach);
 
         if (target != null) {
             // When aiming at an enemy, prioritize attack: suppress block mining so it doesn't interrupt combat
