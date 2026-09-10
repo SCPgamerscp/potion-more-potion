@@ -8,17 +8,27 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.EnderDragonPart;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.Optional;
 
 /**
  * Client-side handler for the Ignore I-Frames Blessing.
- * Detects left-click (keyAttack) hold every tick, and if aiming at a living entity,
- * sends a RapidAttackPacket to trigger 100 attacks per tick.
+ * Detects left-click (keyAttack or GLFW mouse button) hold every tick:
+ * - Continuously swings the player's arm (rapid swing animation).
+ * - Suppresses block mining mode so holding attack never gets stuck mining.
+ * - Performs custom entity raycast (up to 5.0 blocks) targeting both regular entities
+ *   and multipart boss parts (like Ender Dragon parts).
+ * - Sends RapidAttackPacket every tick when a target is in range to execute 100 attacks.
  */
 @Mod.EventBusSubscriber(modid = PotionMorePotionMod.MOD_ID, value = Dist.CLIENT)
 public class IgnoreIframesAttackHandler {
@@ -44,18 +54,85 @@ public class IgnoreIframesAttackHandler {
             return;
         }
 
-        if (!mc.options.keyAttack.isDown()) {
+        // Check if attack key is held via key mapping OR raw GLFW mouse button
+        boolean isAttackPressed = mc.options.keyAttack.isDown();
+        if (!isAttackPressed) {
+            long window = mc.getWindow().getWindow();
+            isAttackPressed = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
+        }
+
+        if (!isAttackPressed) {
             return;
         }
 
-        Entity target = mc.crosshairPickEntity;
-        if (target == null && mc.hitResult instanceof EntityHitResult entityHit) {
-            target = entityHit.getEntity();
+        // Suppress block destroying so left-click hold doesn't turn into mining mode
+        if (mc.gameMode != null) {
+            mc.gameMode.stopDestroyBlock();
         }
 
-        if (target != null && target.isAlive() && target.isAttackable() && target != player) {
+        // Continuously swing arm while holding left click
+        player.swing(InteractionHand.MAIN_HAND);
+
+        // Find target entity in front of player (up to 5.0 blocks)
+        Entity target = findTargetEntity(mc, player, 5.0D);
+        if (target != null) {
             ModMessages.sendToServer(new RapidAttackPacket(target.getId()));
-            player.swing(InteractionHand.MAIN_HAND);
         }
+    }
+
+    private static Entity findTargetEntity(Minecraft mc, LocalPlayer player, double reachDistance) {
+        // 1. Check vanilla crosshair picks first
+        if (mc.crosshairPickEntity != null && mc.crosshairPickEntity.isAlive()
+                && mc.crosshairPickEntity.isAttackable() && mc.crosshairPickEntity != player) {
+            return mc.crosshairPickEntity;
+        }
+        if (mc.hitResult instanceof EntityHitResult entityHit) {
+            Entity entity = entityHit.getEntity();
+            if (entity.isAlive() && entity.isAttackable() && entity != player) {
+                return entity;
+            }
+        }
+
+        // 2. Custom Raycast along eye vector
+        Vec3 eyePos = player.getEyePosition(1.0F);
+        Vec3 viewVec = player.getViewVector(1.0F);
+        Vec3 reachVec = eyePos.add(viewVec.scale(reachDistance));
+        AABB searchBox = player.getBoundingBox().expandTowards(viewVec.scale(reachDistance)).inflate(2.0D);
+
+        double closestDist = reachDistance * reachDistance;
+        Entity closestEntity = null;
+
+        // Search all regular entities in range
+        for (Entity e : player.level().getEntities(player, searchBox,
+                entity -> !entity.isSpectator() && entity.isAttackable() && entity.isAlive() && entity != player)) {
+            AABB aabb = e.getBoundingBox().inflate(0.3D);
+            Optional<Vec3> hit = aabb.clip(eyePos, reachVec);
+            if (hit.isPresent()) {
+                double dist = eyePos.distanceToSqr(hit.get());
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestEntity = e;
+                }
+            }
+        }
+
+        // 3. Also explicitly check Ender Dragon multipart parts in range
+        if (closestEntity == null) {
+            for (EnderDragon dragon : player.level().getEntitiesOfClass(EnderDragon.class, searchBox)) {
+                for (EnderDragonPart part : dragon.getSubEntities()) {
+                    AABB aabb = part.getBoundingBox().inflate(0.3D);
+                    Optional<Vec3> hit = aabb.clip(eyePos, reachVec);
+                    if (hit.isPresent()) {
+                        double dist = eyePos.distanceToSqr(hit.get());
+                        if (dist < closestDist) {
+                            closestDist = dist;
+                            closestEntity = part;
+                        }
+                    }
+                }
+            }
+        }
+
+        return closestEntity;
     }
 }
