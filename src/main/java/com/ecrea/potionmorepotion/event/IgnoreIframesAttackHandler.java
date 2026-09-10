@@ -116,16 +116,20 @@ public class IgnoreIframesAttackHandler {
         double closestDist = reachDistance * reachDistance;
         Entity closestEntity = null;
 
-        // Search all regular entities in range
+        // Search all regular entities in range using thin line raycast with grass penetration
         for (Entity e : player.level().getEntities(player, searchBox,
                 entity -> !entity.isSpectator() && entity.isAttackable() && entity.isAlive() && entity != player)) {
-            AABB aabb = e.getBoundingBox().inflate(0.3D);
+            AABB aabb = e.getBoundingBox().inflate(e.getPickRadius() + 0.1D);
             Optional<Vec3> hit = aabb.clip(eyePos, reachVec);
             if (hit.isPresent()) {
-                double dist = eyePos.distanceToSqr(hit.get());
+                Vec3 hitVec = hit.get();
+                double dist = eyePos.distanceToSqr(hitVec);
                 if (dist < closestDist) {
-                    closestDist = dist;
-                    closestEntity = e;
+                    // Ignore non-solid blocks (grass, flowers) but respect solid collider walls
+                    if (!hasSolidBlockObstacle(player, eyePos, hitVec)) {
+                        closestDist = dist;
+                        closestEntity = e;
+                    }
                 }
             }
         }
@@ -134,13 +138,16 @@ public class IgnoreIframesAttackHandler {
         if (closestEntity == null) {
             for (EnderDragon dragon : player.level().getEntitiesOfClass(EnderDragon.class, searchBox)) {
                 for (EnderDragonPart part : dragon.getSubEntities()) {
-                    AABB aabb = part.getBoundingBox().inflate(0.3D);
+                    AABB aabb = part.getBoundingBox().inflate(part.getPickRadius() + 0.1D);
                     Optional<Vec3> hit = aabb.clip(eyePos, reachVec);
                     if (hit.isPresent()) {
-                        double dist = eyePos.distanceToSqr(hit.get());
+                        Vec3 hitVec = hit.get();
+                        double dist = eyePos.distanceToSqr(hitVec);
                         if (dist < closestDist) {
-                            closestDist = dist;
-                            closestEntity = part;
+                            if (!hasSolidBlockObstacle(player, eyePos, hitVec)) {
+                                closestDist = dist;
+                                closestEntity = part;
+                            }
                         }
                     }
                 }
@@ -148,5 +155,18 @@ public class IgnoreIframesAttackHandler {
         }
 
         return closestEntity;
+    }
+
+    private static boolean hasSolidBlockObstacle(LocalPlayer player, Vec3 start, Vec3 end) {
+        if (player.level() == null) {
+            return false;
+        }
+        net.minecraft.world.phys.BlockHitResult hit = player.level().clip(new net.minecraft.world.level.ClipContext(
+                start, end,
+                net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE,
+                player
+        ));
+        return hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK;
     }
 }

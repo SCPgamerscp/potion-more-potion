@@ -56,7 +56,7 @@ public class RapidAttackPacket {
                 }
             } catch (Exception ignored) {
             }
-            double allowedReach = reach + 3.0D;
+            double allowedReach = Math.max(reach * 1.5D, reach + 6.0D);
             double allowedReachSqr = allowedReach * allowedReach;
 
             // Check distance to center AND distance to bounding box (crucial for big bosses like Ender Dragon)
