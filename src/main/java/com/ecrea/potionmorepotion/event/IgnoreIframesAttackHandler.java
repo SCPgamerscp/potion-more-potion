@@ -65,18 +65,23 @@ public class IgnoreIframesAttackHandler {
             return;
         }
 
-        // Suppress block destroying so left-click hold doesn't turn into mining mode
-        if (mc.gameMode != null) {
-            mc.gameMode.stopDestroyBlock();
-        }
-
-        // Continuously swing arm while holding left click
-        player.swing(InteractionHand.MAIN_HAND);
-
         // Find target entity in front of player (up to 5.0 blocks)
         Entity target = findTargetEntity(mc, player, 5.0D);
+
         if (target != null) {
+            // When aiming at an enemy, prioritize attack: suppress block mining so it doesn't interrupt combat
+            if (mc.gameMode != null) {
+                mc.gameMode.stopDestroyBlock();
+            }
+            player.swing(InteractionHand.MAIN_HAND);
             ModMessages.sendToServer(new RapidAttackPacket(target.getId()));
+        } else {
+            // When no enemy is targeted:
+            // - If aiming at empty air (miss), swing arm for combat readiness.
+            // - If aiming at a block, do NOT suppress or swing, allowing vanilla block mining to work normally!
+            if (mc.hitResult == null || mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
+                player.swing(InteractionHand.MAIN_HAND);
+            }
         }
     }
 
