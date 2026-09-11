@@ -68,10 +68,15 @@ public class LightningBlessingHandler {
                 e -> !e.isSpectator() && e.isPickable());
 
         if (entityHit != null) {
-            double entityDistSqr = eyePos.distanceToSqr(entityHit.getLocation());
+            Vec3 hitPos = entityHit.getLocation();
+            var clipOpt = entityHit.getEntity().getBoundingBox().inflate(0.3D).clip(eyePos, reachVec);
+            if (clipOpt.isPresent()) {
+                hitPos = clipOpt.get();
+            }
+            double entityDistSqr = eyePos.distanceToSqr(hitPos);
             double blockDistSqr = eyePos.distanceToSqr(targetVec);
             if (entityDistSqr < blockDistSqr) {
-                targetVec = entityHit.getLocation();
+                targetVec = hitPos;
             }
         }
 
