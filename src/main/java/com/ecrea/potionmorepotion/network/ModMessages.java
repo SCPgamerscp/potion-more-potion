@@ -48,12 +48,6 @@ public class ModMessages {
                 .encoder(DragonBreathPacket::toBytes)
                 .consumerMainThread(DragonBreathPacket::handle)
                 .add();
-
-        net.messageBuilder(RapidAttackPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
-                .decoder(RapidAttackPacket::new)
-                .encoder(RapidAttackPacket::toBytes)
-                .consumerMainThread(RapidAttackPacket::handle)
-                .add();
     }
 
     public static <MSG> void sendToServer(MSG message) {

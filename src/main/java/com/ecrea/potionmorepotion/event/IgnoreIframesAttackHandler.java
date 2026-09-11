@@ -2,33 +2,27 @@ package com.ecrea.potionmorepotion.event;
 
 import com.ecrea.potionmorepotion.PotionMorePotionMod;
 import com.ecrea.potionmorepotion.effect.ModMobEffects;
-import com.ecrea.potionmorepotion.network.ModMessages;
-import com.ecrea.potionmorepotion.network.RapidAttackPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.boss.EnderDragonPart;
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.lwjgl.glfw.GLFW;
-
-import java.util.Optional;
 
 /**
- * Client-side handler for the Ignore I-Frames Blessing.
- * Detects left-click (keyAttack or GLFW mouse button) hold every tick:
- * - Continuously swings the player's arm (rapid swing animation).
- * - Suppresses block mining mode so holding attack never gets stuck mining.
- * - Performs custom entity raycast (up to 5.0 blocks) targeting both regular entities
- *   and multipart boss parts (like Ender Dragon parts).
- * - Sends RapidAttackPacket every tick when a target is in range to execute 100 attacks.
+ * Client-side true auto-click handler for Ignore I-Frames Blessing.
+ * Detects left-click (keyAttack) hold every tick:
+ * - If aiming at an entity (normal mob or multipart boss part such as Ender Dragon parts),
+ *   executes 100 true vanilla attack clicks via mc.gameMode.attack().
+ * - If aiming at air (MISS), swings the player's arm for combat feedback.
+ * - If aiming at a block (BLOCK), leaves vanilla block mining completely untouched
+ *   so grass, flowers, dirt, stone, etc. can be broken normally.
+ * - Automatically respects ForgeMod.ENTITY_REACH since vanilla's mc.hitResult
+ *   and mc.gameMode.attack() natively use player.getEntityReach().
  */
 @Mod.EventBusSubscriber(modid = PotionMorePotionMod.MOD_ID, value = Dist.CLIENT)
 public class IgnoreIframesAttackHandler {
@@ -41,11 +35,7 @@ public class IgnoreIframesAttackHandler {
 
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || mc.level == null) {
-            return;
-        }
-
-        if (mc.screen != null) {
+        if (player == null || mc.level == null || mc.screen != null || mc.gameMode == null) {
             return;
         }
 
@@ -54,119 +44,30 @@ public class IgnoreIframesAttackHandler {
             return;
         }
 
-        // Check if attack key is held via key mapping OR raw GLFW mouse button
-        boolean isAttackPressed = mc.options.keyAttack.isDown();
-        if (!isAttackPressed) {
-            long window = mc.getWindow().getWindow();
-            isAttackPressed = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
-        }
-
-        if (!isAttackPressed) {
+        if (!mc.options.keyAttack.isDown()) {
             return;
         }
 
-        // Determine reach distance from player's ENTITY_REACH attribute (synchronized with commands / mods)
-        double reach = 5.0D;
-        try {
-            if (net.minecraftforge.common.ForgeMod.ENTITY_REACH.isPresent()) {
-                reach = player.getAttributeValue(net.minecraftforge.common.ForgeMod.ENTITY_REACH.get());
-            }
-        } catch (Exception ignored) {
+        HitResult hit = mc.hitResult;
+        Entity target = null;
+        if (hit instanceof EntityHitResult entityHit) {
+            target = entityHit.getEntity();
+        } else if (mc.crosshairPickEntity != null) {
+            target = mc.crosshairPickEntity;
         }
 
-        // Find target entity in front of player using player's actual reach distance
-        Entity target = findTargetEntity(mc, player, reach);
-
-        if (target != null) {
-            // When aiming at an enemy, prioritize attack: suppress block mining so it doesn't interrupt combat
-            if (mc.gameMode != null) {
-                mc.gameMode.stopDestroyBlock();
+        if (target != null && target.isAlive() && target != player) {
+            // True vanilla auto-click: 100 attacks per tick
+            for (int i = 0; i < 100; i++) {
+                if (!target.isAlive()) {
+                    break;
+                }
+                mc.gameMode.attack(player, target);
             }
             player.swing(InteractionHand.MAIN_HAND);
-            ModMessages.sendToServer(new RapidAttackPacket(target.getId()));
-        } else {
-            // When no enemy is targeted:
-            // - If aiming at empty air (miss), swing arm for combat readiness.
-            // - If aiming at a block, do NOT suppress or swing, allowing vanilla block mining to work normally!
-            if (mc.hitResult == null || mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
-                player.swing(InteractionHand.MAIN_HAND);
-            }
+        } else if (hit == null || hit.getType() == HitResult.Type.MISS) {
+            player.swing(InteractionHand.MAIN_HAND);
         }
-    }
-
-    private static Entity findTargetEntity(Minecraft mc, LocalPlayer player, double reachDistance) {
-        // 1. Check vanilla crosshair picks first
-        if (mc.crosshairPickEntity != null && mc.crosshairPickEntity.isAlive()
-                && mc.crosshairPickEntity.isAttackable() && mc.crosshairPickEntity != player) {
-            return mc.crosshairPickEntity;
-        }
-        if (mc.hitResult instanceof EntityHitResult entityHit) {
-            Entity entity = entityHit.getEntity();
-            if (entity.isAlive() && entity.isAttackable() && entity != player) {
-                return entity;
-            }
-        }
-
-        // 2. Custom Raycast along eye vector
-        Vec3 eyePos = player.getEyePosition(1.0F);
-        Vec3 viewVec = player.getViewVector(1.0F);
-        Vec3 reachVec = eyePos.add(viewVec.scale(reachDistance));
-        AABB searchBox = player.getBoundingBox().expandTowards(viewVec.scale(reachDistance)).inflate(2.0D);
-
-        double closestDist = reachDistance * reachDistance;
-        Entity closestEntity = null;
-
-        // Search all regular entities in range using thin line raycast with grass penetration
-        for (Entity e : player.level().getEntities(player, searchBox,
-                entity -> !entity.isSpectator() && entity.isAttackable() && entity.isAlive() && entity != player)) {
-            AABB aabb = e.getBoundingBox().inflate(e.getPickRadius() + 0.1D);
-            Optional<Vec3> hit = aabb.clip(eyePos, reachVec);
-            if (hit.isPresent()) {
-                Vec3 hitVec = hit.get();
-                double dist = eyePos.distanceToSqr(hitVec);
-                if (dist < closestDist) {
-                    // Ignore non-solid blocks (grass, flowers) but respect solid collider walls
-                    if (!hasSolidBlockObstacle(player, eyePos, hitVec)) {
-                        closestDist = dist;
-                        closestEntity = e;
-                    }
-                }
-            }
-        }
-
-        // 3. Also explicitly check Ender Dragon multipart parts in range
-        if (closestEntity == null) {
-            for (EnderDragon dragon : player.level().getEntitiesOfClass(EnderDragon.class, searchBox)) {
-                for (EnderDragonPart part : dragon.getSubEntities()) {
-                    AABB aabb = part.getBoundingBox().inflate(part.getPickRadius() + 0.1D);
-                    Optional<Vec3> hit = aabb.clip(eyePos, reachVec);
-                    if (hit.isPresent()) {
-                        Vec3 hitVec = hit.get();
-                        double dist = eyePos.distanceToSqr(hitVec);
-                        if (dist < closestDist) {
-                            if (!hasSolidBlockObstacle(player, eyePos, hitVec)) {
-                                closestDist = dist;
-                                closestEntity = part;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return closestEntity;
-    }
-
-    private static boolean hasSolidBlockObstacle(LocalPlayer player, Vec3 start, Vec3 end) {
-        if (player.level() == null) {
-            return false;
-        }
-        net.minecraft.world.phys.BlockHitResult hit = player.level().clip(new net.minecraft.world.level.ClipContext(
-                start, end,
-                net.minecraft.world.level.ClipContext.Block.COLLIDER,
-                net.minecraft.world.level.ClipContext.Fluid.NONE,
-                player
-        ));
-        return hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK;
+        // When hit is a block (Type.BLOCK), do nothing: vanilla block mining runs normally without interruption!
     }
 }
