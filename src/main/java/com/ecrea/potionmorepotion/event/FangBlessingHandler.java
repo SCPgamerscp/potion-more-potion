@@ -60,7 +60,9 @@ public class FangBlessingHandler {
         ClipContext clip = new ClipContext(eyePos, reachVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
         BlockHitResult blockHit = mc.level.clip(clip);
 
-        Vec3 targetVec = blockHit.getType() != HitResult.Type.MISS ? blockHit.getLocation() : reachVec;
+        boolean hitBlock = blockHit.getType() != HitResult.Type.MISS;
+        Vec3 targetVec = hitBlock ? blockHit.getLocation() : reachVec;
+        boolean hitEntity = false;
 
         AABB box = player.getBoundingBox().expandTowards(lookVec.scale(100.0D)).inflate(1.0D);
         EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(
@@ -70,12 +72,15 @@ public class FangBlessingHandler {
         if (entityHit != null) {
             double entityDistSqr = eyePos.distanceToSqr(entityHit.getLocation());
             double blockDistSqr = eyePos.distanceToSqr(targetVec);
-            if (entityDistSqr < blockDistSqr) {
+            if (!hitBlock || entityDistSqr < blockDistSqr) {
                 targetVec = entityHit.getLocation();
+                hitEntity = true;
             }
         }
 
-        ModMessages.sendToServer(new FangAttackPacket(targetVec.x, targetVec.y, targetVec.z));
+        // Only snap to ground when directly hitting a solid block and NOT targeting an entity or open air
+        boolean snapToGround = hitBlock && !hitEntity;
+        ModMessages.sendToServer(new FangAttackPacket(targetVec.x, targetVec.y, targetVec.z, snapToGround));
 
         // Client visual particles: magic spell particles in front of player
         for (int i = 0; i < 2; i++) {
