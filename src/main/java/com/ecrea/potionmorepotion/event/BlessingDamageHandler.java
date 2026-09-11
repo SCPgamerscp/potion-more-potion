@@ -187,6 +187,8 @@ public class BlessingDamageHandler {
                     if (entity.getRemainingFireTicks() == 0) {
                         entity.setSecondsOnFire(8);
                     }
+                } else {
+                    entity.clearFire();
                 }
             }
         }

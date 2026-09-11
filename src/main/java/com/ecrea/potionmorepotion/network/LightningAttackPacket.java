@@ -6,13 +6,20 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -86,18 +93,40 @@ public class LightningAttackPacket {
 
             bolt.moveTo(this.targetX, this.targetY, this.targetZ);
             bolt.setCause(player);
-            if (this.isSneaking) {
+
+            boolean sneaking = this.isSneaking || player.isShiftKeyDown() || player.isCrouching();
+            if (sneaking) {
+                // Completely prevents vanilla LightningBolt.spawnFire() from placing any fire blocks!
+                bolt.setVisualOnly(true);
                 bolt.addTag("no_fire");
             }
             level.addFreshEntity(bolt);
 
-            // If sneaking, prevent fire blocks on the ground
-            if (this.isSneaking) {
+            if (sneaking) {
+                // Extinguish any existing fire in the area
                 BlockPos strikePos = BlockPos.containing(this.targetX, this.targetY, this.targetZ);
                 cleanFireAround(level, strikePos);
-                if (player.getServer() != null) {
-                    player.getServer().tell(new TickTask(player.getServer().getTickCount() + 1, () -> cleanFireAround(level, strikePos)));
-                    player.getServer().tell(new TickTask(player.getServer().getTickCount() + 2, () -> cleanFireAround(level, strikePos)));
+
+                // Because visualOnly disables vanilla entity detection, directly damage entities without setting them on fire!
+                AABB box = new AABB(this.targetX - 3.0D, this.targetY - 3.0D, this.targetZ - 3.0D,
+                                    this.targetX + 3.0D, this.targetY + 9.0D, this.targetZ + 3.0D);
+                List<Entity> list = level.getEntities(bolt, box, Entity::isAlive);
+
+                var damageTypeHolder = level.registryAccess()
+                        .registryOrThrow(Registries.DAMAGE_TYPE)
+                        .getHolderOrThrow(DamageTypes.LIGHTNING_BOLT);
+                DamageSource source = new DamageSource(damageTypeHolder, bolt, player);
+                var lightningObj = ModMobEffects.EFFECTS.get("lightning_blessing");
+
+                for (Entity target : list) {
+                    if (target == player) {
+                        continue;
+                    }
+                    if (target instanceof LivingEntity living && lightningObj != null && living.hasEffect(lightningObj.get())) {
+                        continue;
+                    }
+                    target.hurt(source, bolt.getDamage());
+                    target.clearFire(); // Completely extinguish entity so zero fire is attached
                 }
             }
         });
@@ -105,7 +134,7 @@ public class LightningAttackPacket {
     }
 
     private static void cleanFireAround(ServerLevel level, BlockPos center) {
-        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-3, -2, -3), center.offset(3, 3, 3))) {
+        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-3, -2, -3), center.offset(3, 4, 3))) {
             if (level.getBlockState(pos).getBlock() instanceof BaseFireBlock) {
                 level.removeBlock(pos, false);
             }
