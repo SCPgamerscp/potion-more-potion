@@ -17,7 +17,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.ThrownPotion;
-import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -156,48 +155,6 @@ public class BlessingDamageHandler {
         if (source.is(DamageTypes.LIGHTNING_BOLT) && source.getEntity() == null && source.getDirectEntity() == null) {
             event.setCanceled(true);
             return;
-        }
-    }
-
-    /**
-     * Intercepts lightning strikes caused by players with Lightning Blessing.
-     * Cancels vanilla environmental damage and applies player-attributed lightning damage
-     * so that kills count towards the player (XP drops, loot, advancements).
-     */
-    @SubscribeEvent
-    public static void onEntityStruckByLightning(EntityStruckByLightningEvent event) {
-        LightningBolt bolt = event.getLightning();
-        ServerPlayer cause = bolt.getCause();
-        if (cause != null) {
-            var lightningObj = ModMobEffects.EFFECTS.get("lightning_blessing");
-            if (lightningObj != null && cause.hasEffect(lightningObj.get())) {
-                Entity entity = event.getEntity();
-
-                // If struck entity is the caster or has active lightning_blessing, cancel completely
-                if (entity == cause || (entity instanceof LivingEntity living && living.hasEffect(lightningObj.get()))) {
-                    event.setCanceled(true);
-                    return;
-                }
-
-                // Cancel vanilla environmental thunderHit
-                event.setCanceled(true);
-
-                // Inflict player-attributed lightning damage (counts as player kill, XP, loot, advancements)
-                var damageTypeHolder = entity.level().registryAccess()
-                        .registryOrThrow(Registries.DAMAGE_TYPE)
-                        .getHolderOrThrow(DamageTypes.LIGHTNING_BOLT);
-                DamageSource source = new DamageSource(damageTypeHolder, bolt, cause);
-                entity.hurt(source, bolt.getDamage());
-
-                if (!bolt.getTags().contains("no_fire")) {
-                    entity.setRemainingFireTicks(entity.getRemainingFireTicks() + 1);
-                    if (entity.getRemainingFireTicks() == 0) {
-                        entity.setSecondsOnFire(8);
-                    }
-                } else {
-                    entity.clearFire();
-                }
-            }
         }
     }
 

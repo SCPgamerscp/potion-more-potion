@@ -75,8 +75,7 @@ public class LightningBlessingHandler {
             }
         }
 
-        boolean isSneaking = player.isShiftKeyDown() || player.isCrouching();
-        ModMessages.sendToServer(new LightningAttackPacket(targetVec.x, targetVec.y, targetVec.z, isSneaking));
+        ModMessages.sendToServer(new LightningAttackPacket(targetVec.x, targetVec.y, targetVec.z));
 
         // Client visual particles: electric spark particles in front of player
         for (int i = 0; i < 2; i++) {
