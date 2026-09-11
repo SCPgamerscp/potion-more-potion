@@ -150,6 +150,13 @@ public class BlessingDamageHandler {
                 return;
             }
         }
+
+        // Cancel vanilla environmental lightning damage from inside thunderHit()
+        // so that our player-attributed damage from LightningAttackPacket takes effect instead!
+        if (source.is(DamageTypes.LIGHTNING_BOLT) && source.getEntity() == null && source.getDirectEntity() == null) {
+            event.setCanceled(true);
+            return;
+        }
     }
 
     /**
@@ -287,6 +294,11 @@ public class BlessingDamageHandler {
                 event.setCanceled(true);
                 return;
             }
+        }
+
+        if (source.is(DamageTypes.LIGHTNING_BOLT) && source.getEntity() == null && source.getDirectEntity() == null) {
+            event.setCanceled(true);
+            return;
         }
 
         // Apply 50% damage reduction for each active blessing

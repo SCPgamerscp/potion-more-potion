@@ -11,8 +11,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.block.BaseFireBlock;
@@ -94,40 +96,56 @@ public class LightningAttackPacket {
             bolt.moveTo(this.targetX, this.targetY, this.targetZ);
             bolt.setCause(player);
 
-            boolean sneaking = this.isSneaking || player.isShiftKeyDown() || player.isCrouching();
-            if (sneaking) {
-                // Completely prevents vanilla LightningBolt.spawnFire() from placing any fire blocks!
-                bolt.setVisualOnly(true);
-                bolt.addTag("no_fire");
-            }
+            // Ground fire blocks are ALWAYS zero: visualOnly completely prevents vanilla LightningBolt.spawnFire()!
+            bolt.setVisualOnly(true);
             level.addFreshEntity(bolt);
 
-            if (sneaking) {
-                // Extinguish any existing fire in the area
-                BlockPos strikePos = BlockPos.containing(this.targetX, this.targetY, this.targetZ);
-                cleanFireAround(level, strikePos);
+            // Extinguish any pre-existing fire in the area
+            BlockPos strikePos = BlockPos.containing(this.targetX, this.targetY, this.targetZ);
+            cleanFireAround(level, strikePos);
 
-                // Because visualOnly disables vanilla entity detection, directly damage entities without setting them on fire!
-                AABB box = new AABB(this.targetX - 3.0D, this.targetY - 3.0D, this.targetZ - 3.0D,
-                                    this.targetX + 3.0D, this.targetY + 9.0D, this.targetZ + 3.0D);
-                List<Entity> list = level.getEntities(bolt, box, Entity::isAlive);
+            // Query all entities in the impact box (including non-living entities like EndCrystal, PartEntity, Boat, Minecart)
+            AABB box = new AABB(this.targetX - 3.0D, this.targetY - 3.0D, this.targetZ - 3.0D,
+                                this.targetX + 3.0D, this.targetY + 9.0D, this.targetZ + 3.0D);
+            List<Entity> list = level.getEntities(bolt, box, e -> !e.isRemoved());
 
-                var damageTypeHolder = level.registryAccess()
-                        .registryOrThrow(Registries.DAMAGE_TYPE)
-                        .getHolderOrThrow(DamageTypes.LIGHTNING_BOLT);
-                DamageSource source = new DamageSource(damageTypeHolder, bolt, player);
-                var lightningObj = ModMobEffects.EFFECTS.get("lightning_blessing");
+            var damageTypeHolder = level.registryAccess()
+                    .registryOrThrow(Registries.DAMAGE_TYPE)
+                    .getHolderOrThrow(DamageTypes.LIGHTNING_BOLT);
+            DamageSource source = new DamageSource(damageTypeHolder, bolt, player);
+            var lightningObj = ModMobEffects.EFFECTS.get("lightning_blessing");
 
-                for (Entity target : list) {
-                    if (target == player) {
-                        continue;
-                    }
-                    if (target instanceof LivingEntity living && lightningObj != null && living.hasEffect(lightningObj.get())) {
-                        continue;
-                    }
-                    target.hurt(source, bolt.getDamage());
-                    target.clearFire(); // Completely extinguish entity so zero fire is attached
+            for (Entity target : list) {
+                // 1. Completely protect dropped items and experience orbs from lightning, fire, and explosions
+                if (target instanceof ItemEntity itemEntity) {
+                    itemEntity.setInvulnerable(true);
+                    itemEntity.clearFire();
+                    continue;
                 }
+                if (target instanceof ExperienceOrb orb) {
+                    orb.setInvulnerable(true);
+                    orb.clearFire();
+                    continue;
+                }
+
+                // 2. Skip caster and players/allies with active lightning blessing
+                if (target == player) {
+                    continue;
+                }
+                if (target instanceof LivingEntity living && lightningObj != null && living.hasEffect(lightningObj.get())) {
+                    continue;
+                }
+
+                // 3. If living entity: trigger mob transformations (Charged Creeper, Piglin, Witch, Mooshroom)
+                // and 8-second burning debuff on enemy
+                if (target instanceof LivingEntity living) {
+                    living.thunderHit(level, bolt);
+                    living.setSecondsOnFire(8);
+                    living.setLastHurtByPlayer(player);
+                }
+
+                // 4. Deal player-attributed lightning damage (works on LivingEntity, EndCrystal, PartEntity, Boat, Minecart, etc.!)
+                target.hurt(source, bolt.getDamage());
             }
         });
         return true;
