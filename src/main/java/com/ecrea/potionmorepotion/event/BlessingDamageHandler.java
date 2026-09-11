@@ -14,6 +14,9 @@ import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.ThrownPotion;
@@ -150,6 +153,17 @@ public class BlessingDamageHandler {
             }
         }
 
+        // 6. Explosion Blessing: completely immune to self-inflicted explosion damage
+        var explosionObj = ModMobEffects.EFFECTS.get("explosion_blessing");
+        if (explosionObj != null && entity.hasEffect(explosionObj.get())) {
+            if (source.is(DamageTypes.EXPLOSION) || source.is(DamageTypes.PLAYER_EXPLOSION)) {
+                if (source.getEntity() == entity || source.getDirectEntity() == entity) {
+                    event.setCanceled(true);
+                    return;
+                }
+            }
+        }
+
         // Cancel vanilla environmental lightning damage from inside thunderHit()
         // so that our player-attributed damage from LightningAttackPacket takes effect instead!
         if (source.is(DamageTypes.LIGHTNING_BOLT) && source.getEntity() == null && source.getDirectEntity() == null) {
@@ -160,11 +174,39 @@ public class BlessingDamageHandler {
 
     @SubscribeEvent
     public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
-        // Protect players with ender_dragon_blessing from explosion knockback/damage caused by dragon fireballs
+        var explosion = event.getExplosion();
+        var explosionObj = ModMobEffects.EFFECTS.get("explosion_blessing");
+        var dragonObj = ModMobEffects.EFFECTS.get("ender_dragon_blessing");
+
+        Entity exploder = explosion.getIndirectSourceEntity() != null ? explosion.getIndirectSourceEntity() : explosion.getExploder();
+        boolean isExplosionBlessingCaster = exploder instanceof LivingEntity livingExploder &&
+                explosionObj != null && livingExploder.hasEffect(explosionObj.get());
+
+        // 1. If explosion was caused by someone with explosion_blessing, completely protect dropped items & XP
+        if (isExplosionBlessingCaster) {
+            event.getAffectedEntities().removeIf(e -> e instanceof ItemEntity || e instanceof ExperienceOrb);
+        }
+
+        // 2. Protect players with explosion_blessing from their own explosions (damage and knockback)
+        if (isExplosionBlessingCaster && exploder instanceof Player exploderPlayer) {
+            event.getAffectedEntities().remove(exploderPlayer);
+            explosion.getHitPlayers().remove(exploderPlayer);
+        }
+
+        // 3. Protect any entity with explosion_blessing from their own explosion, or dragon blessing from dragon explosion
         event.getAffectedEntities().removeIf(e -> {
             if (e instanceof LivingEntity living) {
-                var dragonObj = ModMobEffects.EFFECTS.get("ender_dragon_blessing");
-                return dragonObj != null && living.hasEffect(dragonObj.get());
+                if (explosionObj != null && living.hasEffect(explosionObj.get())) {
+                    if (exploder == living) {
+                        if (living instanceof Player p) {
+                            explosion.getHitPlayers().remove(p);
+                        }
+                        return true;
+                    }
+                }
+                if (dragonObj != null && living.hasEffect(dragonObj.get())) {
+                    return true;
+                }
             }
             return false;
         });
@@ -175,10 +217,12 @@ public class BlessingDamageHandler {
         LivingEntity entity = event.getEntity();
         var potionObj = ModMobEffects.EFFECTS.get("potion_blessing");
         var dragonObj = ModMobEffects.EFFECTS.get("ender_dragon_blessing");
+        var explosionObj = ModMobEffects.EFFECTS.get("explosion_blessing");
 
-        // Cancel knockback if player has potion or dragon blessing and damage was self-inflicted
+        // Cancel knockback if player has potion, dragon, or explosion blessing and damage was self-inflicted
         if ((potionObj != null && entity.hasEffect(potionObj.get())) ||
-            (dragonObj != null && entity.hasEffect(dragonObj.get()))) {
+            (dragonObj != null && entity.hasEffect(dragonObj.get())) ||
+            (explosionObj != null && entity.hasEffect(explosionObj.get()))) {
             if (entity.getLastDamageSource() != null && entity.getLastDamageSource().getEntity() == entity) {
                 event.setCanceled(true);
             }
@@ -250,6 +294,16 @@ public class BlessingDamageHandler {
             if (source.is(DamageTypes.LIGHTNING_BOLT)) {
                 event.setCanceled(true);
                 return;
+            }
+        }
+
+        var explosionObj = ModMobEffects.EFFECTS.get("explosion_blessing");
+        if (explosionObj != null && entity.hasEffect(explosionObj.get())) {
+            if (source.is(DamageTypes.EXPLOSION) || source.is(DamageTypes.PLAYER_EXPLOSION)) {
+                if (source.getEntity() == entity || source.getDirectEntity() == entity) {
+                    event.setCanceled(true);
+                    return;
+                }
             }
         }
 

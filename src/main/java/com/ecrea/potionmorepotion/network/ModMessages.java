@@ -60,6 +60,12 @@ public class ModMessages {
                 .encoder(LightningAttackPacket::toBytes)
                 .consumerMainThread(LightningAttackPacket::handle)
                 .add();
+
+        net.messageBuilder(ExplosionAttackPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(ExplosionAttackPacket::new)
+                .encoder(ExplosionAttackPacket::toBytes)
+                .consumerMainThread(ExplosionAttackPacket::handle)
+                .add();
     }
 
     public static <MSG> void sendToServer(MSG message) {

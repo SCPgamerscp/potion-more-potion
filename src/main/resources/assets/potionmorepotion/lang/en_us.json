@@ -89,5 +89,11 @@
   "item.minecraft.potion.effect.lightning_blessing": "Potion of Blessing of Lightning",
   "item.minecraft.splash_potion.effect.lightning_blessing": "Splash Potion of Blessing of Lightning",
   "item.minecraft.lingering_potion.effect.lightning_blessing": "Lingering Potion of Blessing of Lightning",
-  "item.minecraft.tipped_arrow.effect.lightning_blessing": "Arrow of Blessing of Lightning"
+  "item.minecraft.tipped_arrow.effect.lightning_blessing": "Arrow of Blessing of Lightning",
+
+  "effect.potionmorepotion.explosion_blessing": "Blessing of Explosion",
+  "item.minecraft.potion.effect.explosion_blessing": "Potion of Blessing of Explosion",
+  "item.minecraft.splash_potion.effect.explosion_blessing": "Splash Potion of Blessing of Explosion",
+  "item.minecraft.lingering_potion.effect.explosion_blessing": "Lingering Potion of Blessing of Explosion",
+  "item.minecraft.tipped_arrow.effect.explosion_blessing": "Arrow of Blessing of Explosion"
 }
