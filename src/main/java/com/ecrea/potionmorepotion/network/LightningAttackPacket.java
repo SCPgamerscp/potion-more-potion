@@ -86,6 +86,9 @@ public class LightningAttackPacket {
 
             bolt.moveTo(this.targetX, this.targetY, this.targetZ);
             bolt.setCause(player);
+            if (this.isSneaking) {
+                bolt.addTag("no_fire");
+            }
             level.addFreshEntity(bolt);
 
             // If sneaking, prevent fire blocks on the ground
