@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Saddleable;
@@ -22,19 +23,39 @@ import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Strider;
+import net.minecraft.world.entity.monster.ZombieVillager;
+import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
+import net.minecraft.world.item.ArmorStandItem;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BoatItem;
+import net.minecraft.world.item.BoneMealItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.EndCrystalItem;
+import net.minecraft.world.item.FireChargeItem;
+import net.minecraft.world.item.FlintAndSteelItem;
+import net.minecraft.world.item.HangingEntityItem;
+import net.minecraft.world.item.HoeItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.LeadItem;
+import net.minecraft.world.item.MinecartItem;
+import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.item.NameTagItem;
 import net.minecraft.world.item.SaddleItem;
+import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.ShovelItem;
+import net.minecraft.world.item.SolidBucketItem;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,9 +70,10 @@ import net.minecraftforge.fml.common.Mod;
 /**
  * Helper to determine whether special breath attacks (Fire Charge, Snowball, Potion, Dragon)
  * should be suppressed in order to prioritize:
- * 1. Block placement (holding BlockItem)
- * 2. Block interactions (chests, doors, crafting tables, anvils, etc.)
- * 3. Entity interactions (trading, mounting, feeding/breeding, shearing, milking, sitting pets, armor stands, etc.)
+ * 1. Entity and block placement (holding BlockItem, SpawnEggItem, BoatItem, MinecartItem, ArmorStandItem, etc.)
+ * 2. World interactions (buckets, bonemeal, tilling, pathing, stripping, etc.)
+ * 3. Block interactions (chests, doors, crafting tables, anvils, etc.)
+ * 4. Entity interactions (trading, mounting, feeding/breeding, shearing, milking, sitting pets, armor stands, etc.)
  *
  * When an entity interaction is NOT taking place (e.g. aiming at enemies, or aiming from a distance,
  * or holding items that don't interact with the entity), shooting is fully permitted so players can
@@ -65,7 +87,8 @@ public class BlessingInteractionHelper {
     @SubscribeEvent
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
         if (event.getLevel().isClientSide() && event.getEntity() instanceof LocalPlayer localPlayer) {
-            if (canInteractWithEntity(localPlayer, event.getTarget(), event.getHand())) {
+            if (event.isCanceled() || event.getCancellationResult().consumesAction() ||
+                    canInteractWithEntity(localPlayer, event.getTarget(), event.getHand())) {
                 suppressUntilGameTime = event.getLevel().getGameTime() + 10L;
             }
         }
@@ -74,10 +97,45 @@ public class BlessingInteractionHelper {
     @SubscribeEvent
     public static void onEntityInteractSpecific(PlayerInteractEvent.EntityInteractSpecific event) {
         if (event.getLevel().isClientSide() && event.getEntity() instanceof LocalPlayer localPlayer) {
-            if (canInteractWithEntity(localPlayer, event.getTarget(), event.getHand())) {
+            if (event.isCanceled() || event.getCancellationResult().consumesAction() ||
+                    canInteractWithEntity(localPlayer, event.getTarget(), event.getHand())) {
                 suppressUntilGameTime = event.getLevel().getGameTime() + 10L;
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getLevel().isClientSide() && event.getEntity() instanceof LocalPlayer localPlayer) {
+            if (event.isCanceled() || event.getCancellationResult().consumesAction() ||
+                    isPlacementOrWorldUseItem(event.getItemStack())) {
+                suppressUntilGameTime = event.getLevel().getGameTime() + 10L;
+            }
+        }
+    }
+
+    public static boolean isPlacementOrWorldUseItem(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return false;
+        }
+        Item item = stack.getItem();
+        return item instanceof BlockItem
+                || item instanceof SpawnEggItem
+                || item instanceof BoatItem
+                || item instanceof MinecartItem
+                || item instanceof ArmorStandItem
+                || item instanceof EndCrystalItem
+                || item instanceof HangingEntityItem
+                || item instanceof BucketItem
+                || item instanceof SolidBucketItem
+                || item instanceof MobBucketItem
+                || item instanceof BoneMealItem
+                || item instanceof FlintAndSteelItem
+                || item instanceof FireChargeItem
+                || item instanceof HoeItem
+                || item instanceof ShovelItem
+                || item instanceof AxeItem
+                || item instanceof ShearsItem;
     }
 
     public static boolean shouldSuppressBreath(Minecraft mc, LocalPlayer player) {
@@ -89,9 +147,22 @@ public class BlessingInteractionHelper {
             }
         }
 
-        // 2. Recent entity interaction buffer (suppress for 10 ticks = 0.5s after an interaction occurred)
+        // 2. Recent interaction buffer (suppress for 10 ticks = 0.5s after an interaction occurred)
         if (mc.level != null && mc.level.getGameTime() < suppressUntilGameTime) {
             return true;
+        }
+
+        ItemStack main = player.getMainHandItem();
+        ItemStack off = player.getOffhandItem();
+
+        // 3. Prioritize placing entities / blocks or using tools in the world (boats, spawn eggs, buckets, blocks)
+        if (isPlacementOrWorldUseItem(main) || isPlacementOrWorldUseItem(off)) {
+            HitResult hit = mc.hitResult;
+            if (hit != null && (hit.getType() == HitResult.Type.BLOCK ||
+                    main.getItem() instanceof BoatItem || off.getItem() instanceof BoatItem ||
+                    main.getItem() instanceof BucketItem || off.getItem() instanceof BucketItem)) {
+                return true;
+            }
         }
 
         HitResult hit = mc.hitResult;
@@ -99,7 +170,7 @@ public class BlessingInteractionHelper {
             return false;
         }
 
-        // 3. Interacting with interactable entities (Trading, mounting, petting, shearing, feeding, etc.)
+        // 4. Interacting with interactable entities (Trading, mounting, petting, shearing, feeding, etc.)
         if (hit.getType() == HitResult.Type.ENTITY && hit instanceof EntityHitResult entityHit) {
             Entity target = entityHit.getEntity();
             if (canInteractWithEntity(player, target, InteractionHand.MAIN_HAND) ||
@@ -108,15 +179,8 @@ public class BlessingInteractionHelper {
             }
         }
 
-        // 4. Interacting with blocks
+        // 5. Interacting with blocks
         if (hit.getType() == HitResult.Type.BLOCK && hit instanceof BlockHitResult blockHit) {
-            // If the player holds a BlockItem in main-hand or off-hand, prioritize block placement!
-            ItemStack main = player.getMainHandItem();
-            ItemStack off = player.getOffhandItem();
-            if (main.getItem() instanceof BlockItem || off.getItem() instanceof BlockItem) {
-                return true;
-            }
-
             // If not sneaking, prioritize interacting with interactive blocks (chests, crafting tables, doors, buttons, etc.)
             if (!player.isShiftKeyDown() && mc.level != null) {
                 BlockPos pos = blockHit.getBlockPos();
@@ -168,6 +232,10 @@ public class BlessingInteractionHelper {
         ItemStack held = player.getItemInHand(hand);
 
         // 1. General interaction items that interact with mobs
+        if (held.getItem() instanceof SpawnEggItem) {
+            // Spawns baby of matching mob or spawns entity on click
+            return true;
+        }
         if (held.getItem() instanceof NameTagItem && held.hasCustomHoverName()) {
             return true;
         }
@@ -284,6 +352,23 @@ public class BlessingInteractionHelper {
             if (held.is(Items.IRON_INGOT) && golem.getHealth() < golem.getMaxHealth()) {
                 return true;
             }
+        }
+
+        // 12. Curing Zombie Villager with Golden Apple
+        if (target instanceof ZombieVillager zombieVillager && held.is(Items.GOLDEN_APPLE)) {
+            if (zombieVillager.hasEffect(MobEffects.WEAKNESS)) {
+                return true;
+            }
+        }
+
+        // 13. Bartering with Piglin with Gold Ingot
+        if (target instanceof Piglin piglin && held.is(Items.GOLD_INGOT) && piglin.isAdult()) {
+            return true;
+        }
+
+        // 14. Igniting Creeper with Flint and Steel or Fire Charge
+        if (target instanceof Creeper && (held.getItem() instanceof FlintAndSteelItem || held.getItem() instanceof FireChargeItem)) {
+            return true;
         }
 
         return false;
