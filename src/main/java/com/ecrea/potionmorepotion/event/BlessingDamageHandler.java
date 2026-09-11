@@ -11,6 +11,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.DragonFireball;
+import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -126,6 +127,24 @@ public class BlessingDamageHandler {
                 return;
             }
         }
+
+        // 4. Fang Blessing: completely immune to Evoker Fangs damage
+        var fangObj = ModMobEffects.EFFECTS.get("fang_blessing");
+        if (fangObj != null && entity.hasEffect(fangObj.get())) {
+            if (source.getDirectEntity() instanceof EvokerFangs) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+
+        // 5. Lightning Blessing: completely immune to Lightning Bolt damage
+        var lightningObj = ModMobEffects.EFFECTS.get("lightning_blessing");
+        if (lightningObj != null && entity.hasEffect(lightningObj.get())) {
+            if (source.is(DamageTypes.LIGHTNING_BOLT)) {
+                event.setCanceled(true);
+                return;
+            }
+        }
     }
 
     @SubscribeEvent
@@ -202,6 +221,22 @@ public class BlessingDamageHandler {
             if (source.getEntity() == entity &&
                     (source.is(DamageTypes.INDIRECT_MAGIC) ||
                      source.is(DamageTypes.MAGIC))) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+
+        var fangObj = ModMobEffects.EFFECTS.get("fang_blessing");
+        if (fangObj != null && entity.hasEffect(fangObj.get())) {
+            if (source.getDirectEntity() instanceof EvokerFangs) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+
+        var lightningObj = ModMobEffects.EFFECTS.get("lightning_blessing");
+        if (lightningObj != null && entity.hasEffect(lightningObj.get())) {
+            if (source.is(DamageTypes.LIGHTNING_BOLT)) {
                 event.setCanceled(true);
                 return;
             }

@@ -48,6 +48,18 @@ public class ModMessages {
                 .encoder(DragonBreathPacket::toBytes)
                 .consumerMainThread(DragonBreathPacket::handle)
                 .add();
+
+        net.messageBuilder(FangAttackPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(FangAttackPacket::new)
+                .encoder(FangAttackPacket::toBytes)
+                .consumerMainThread(FangAttackPacket::handle)
+                .add();
+
+        net.messageBuilder(LightningAttackPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(LightningAttackPacket::new)
+                .encoder(LightningAttackPacket::toBytes)
+                .consumerMainThread(LightningAttackPacket::handle)
+                .add();
     }
 
     public static <MSG> void sendToServer(MSG message) {
