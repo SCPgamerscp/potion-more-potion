@@ -95,5 +95,11 @@
   "item.minecraft.potion.effect.explosion_blessing": "爆発の加護のポーション",
   "item.minecraft.splash_potion.effect.explosion_blessing": "スプラッシュ・爆発の加護のポーション",
   "item.minecraft.lingering_potion.effect.explosion_blessing": "残留の爆発の加護のポーション",
-  "item.minecraft.tipped_arrow.effect.explosion_blessing": "爆発の加護の矢"
+  "item.minecraft.tipped_arrow.effect.explosion_blessing": "爆発の加護の矢",
+
+  "effect.potionmorepotion.egg_blessing": "卵の加護",
+  "item.minecraft.potion.effect.egg_blessing": "卵の加護のポーション",
+  "item.minecraft.splash_potion.effect.egg_blessing": "スプラッシュ・卵の加護のポーション",
+  "item.minecraft.lingering_potion.effect.egg_blessing": "残留の卵の加護のポーション",
+  "item.minecraft.tipped_arrow.effect.egg_blessing": "卵の加護の矢"
 }

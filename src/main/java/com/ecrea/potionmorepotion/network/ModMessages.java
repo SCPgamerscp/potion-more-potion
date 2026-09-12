@@ -66,6 +66,12 @@ public class ModMessages {
                 .encoder(ExplosionAttackPacket::toBytes)
                 .consumerMainThread(ExplosionAttackPacket::handle)
                 .add();
+
+        net.messageBuilder(EggBreathPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(EggBreathPacket::new)
+                .encoder(EggBreathPacket::toBytes)
+                .consumerMainThread(EggBreathPacket::handle)
+                .add();
     }
 
     public static <MSG> void sendToServer(MSG message) {

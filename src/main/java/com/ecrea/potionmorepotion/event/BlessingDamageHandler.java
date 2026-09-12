@@ -19,6 +19,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.entity.projectile.EvokerFangs;
+import net.minecraft.world.entity.projectile.ThrownEgg;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -164,6 +165,19 @@ public class BlessingDamageHandler {
             }
         }
 
+        // 7. Egg Blessing: completely immune to fall damage (like chickens) and self-thrown eggs
+        var eggObj = ModMobEffects.EFFECTS.get("egg_blessing");
+        if (eggObj != null && entity.hasEffect(eggObj.get())) {
+            if (source.is(DamageTypes.FALL)) {
+                event.setCanceled(true);
+                return;
+            }
+            if (source.getDirectEntity() instanceof ThrownEgg egg && (egg.getOwner() == entity || egg.getOwner() == null)) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+
         // Cancel vanilla environmental lightning damage from inside thunderHit()
         // so that our player-attributed damage from LightningAttackPacket takes effect instead!
         if (source.is(DamageTypes.LIGHTNING_BOLT) && source.getEntity() == null && source.getDirectEntity() == null) {
@@ -218,11 +232,13 @@ public class BlessingDamageHandler {
         var potionObj = ModMobEffects.EFFECTS.get("potion_blessing");
         var dragonObj = ModMobEffects.EFFECTS.get("ender_dragon_blessing");
         var explosionObj = ModMobEffects.EFFECTS.get("explosion_blessing");
+        var eggObj = ModMobEffects.EFFECTS.get("egg_blessing");
 
-        // Cancel knockback if player has potion, dragon, or explosion blessing and damage was self-inflicted
+        // Cancel knockback if player has potion, dragon, explosion, or egg blessing and damage was self-inflicted
         if ((potionObj != null && entity.hasEffect(potionObj.get())) ||
             (dragonObj != null && entity.hasEffect(dragonObj.get())) ||
-            (explosionObj != null && entity.hasEffect(explosionObj.get()))) {
+            (explosionObj != null && entity.hasEffect(explosionObj.get())) ||
+            (eggObj != null && entity.hasEffect(eggObj.get()))) {
             if (entity.getLastDamageSource() != null && entity.getLastDamageSource().getEntity() == entity) {
                 event.setCanceled(true);
             }
@@ -304,6 +320,18 @@ public class BlessingDamageHandler {
                     event.setCanceled(true);
                     return;
                 }
+            }
+        }
+
+        var eggObj = ModMobEffects.EFFECTS.get("egg_blessing");
+        if (eggObj != null && entity.hasEffect(eggObj.get())) {
+            if (source.is(DamageTypes.FALL)) {
+                event.setCanceled(true);
+                return;
+            }
+            if (source.getDirectEntity() instanceof ThrownEgg egg && (egg.getOwner() == entity || egg.getOwner() == null)) {
+                event.setCanceled(true);
+                return;
             }
         }
 
