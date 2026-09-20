@@ -49,10 +49,8 @@ public class FlightGlidePacket {
             }
 
             if (this.start) {
-                if (!player.onGround() && !player.isInWater() && !player.hasEffect(MobEffects.LEVITATION)) {
-                    player.getPersistentData().putBoolean(NBT_FLIGHT_GLIDING, true);
-                    player.startFallFlying();
-                }
+                player.getPersistentData().putBoolean(NBT_FLIGHT_GLIDING, true);
+                player.startFallFlying();
             } else {
                 player.getPersistentData().remove(NBT_FLIGHT_GLIDING);
                 player.stopFallFlying();

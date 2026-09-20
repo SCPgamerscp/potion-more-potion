@@ -84,8 +84,8 @@ public class BlessingDamageHandler {
 
         boolean isGliding = player.getPersistentData().getBoolean(FlightGlidePacket.NBT_FLIGHT_GLIDING);
         if (isGliding) {
-            if (player.onGround() || player.isInWater() || player.hasEffect(MobEffects.LEVITATION)) {
-                // Landed on ground or submerged in water -> stop gliding
+            // Land only on solid ground (player can continue flying through water)
+            if (player.onGround() && !player.isInWater()) {
                 player.getPersistentData().remove(FlightGlidePacket.NBT_FLIGHT_GLIDING);
                 player.stopFallFlying();
             } else {
