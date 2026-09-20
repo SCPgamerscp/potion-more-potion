@@ -3,7 +3,6 @@ package com.ecrea.potionmorepotion.network;
 import com.ecrea.potionmorepotion.effect.ModMobEffects;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
