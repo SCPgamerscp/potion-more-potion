@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
@@ -52,6 +53,17 @@ public class BlessingDamageHandler {
         if (snowballObj != null && entity.hasEffect(snowballObj.get())) {
             if (entity.getTicksFrozen() > 0) {
                 entity.setTicksFrozen(0);
+            }
+        }
+
+        var flightObj = ModMobEffects.EFFECTS.get("flight_blessing");
+        if (flightObj != null && entity.hasEffect(flightObj.get()) && entity instanceof Player player) {
+            if (player.isFallFlying()) {
+                if (!player.onGround() && !player.isInWater() && !player.hasEffect(MobEffects.LEVITATION)) {
+                    player.startFallFlying();
+                } else {
+                    player.stopFallFlying();
+                }
             }
         }
     }
@@ -173,6 +185,15 @@ public class BlessingDamageHandler {
                 return;
             }
             if (source.getDirectEntity() instanceof ThrownEgg egg && (egg.getOwner() == entity || egg.getOwner() == null)) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+
+        // 8. Flight Blessing: completely immune to fall damage and flying-into-wall kinetic damage
+        var flightObj = ModMobEffects.EFFECTS.get("flight_blessing");
+        if (flightObj != null && entity.hasEffect(flightObj.get())) {
+            if (source.is(DamageTypes.FALL) || source.is(DamageTypes.FLY_INTO_WALL)) {
                 event.setCanceled(true);
                 return;
             }
@@ -330,6 +351,14 @@ public class BlessingDamageHandler {
                 return;
             }
             if (source.getDirectEntity() instanceof ThrownEgg egg && (egg.getOwner() == entity || egg.getOwner() == null)) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+
+        var flightObj = ModMobEffects.EFFECTS.get("flight_blessing");
+        if (flightObj != null && entity.hasEffect(flightObj.get())) {
+            if (source.is(DamageTypes.FALL) || source.is(DamageTypes.FLY_INTO_WALL)) {
                 event.setCanceled(true);
                 return;
             }

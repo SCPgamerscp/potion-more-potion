@@ -72,6 +72,18 @@ public class ModMessages {
                 .encoder(EggBreathPacket::toBytes)
                 .consumerMainThread(EggBreathPacket::handle)
                 .add();
+
+        net.messageBuilder(FlightGlidePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(FlightGlidePacket::new)
+                .encoder(FlightGlidePacket::toBytes)
+                .consumerMainThread(FlightGlidePacket::handle)
+                .add();
+
+        net.messageBuilder(FlightBoostPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(FlightBoostPacket::new)
+                .encoder(FlightBoostPacket::toBytes)
+                .consumerMainThread(FlightBoostPacket::handle)
+                .add();
     }
 
     public static <MSG> void sendToServer(MSG message) {
