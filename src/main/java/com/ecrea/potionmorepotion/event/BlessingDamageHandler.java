@@ -27,6 +27,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
+import net.minecraftforge.event.TickEvent;
+import com.ecrea.potionmorepotion.network.FlightGlidePacket;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -55,15 +57,41 @@ public class BlessingDamageHandler {
                 entity.setTicksFrozen(0);
             }
         }
+    }
 
+    /**
+     * Server-side player tick at Phase.END:
+     * Maintains fall-flying (elytra gliding) even without an elytra equipped when flight blessing is active.
+     * Calling startFallFlying() here overrides vanilla's updateFallFlying() which clears the flag earlier in aiStep().
+     */
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || event.player.level().isClientSide) {
+            return;
+        }
+
+        Player player = event.player;
         var flightObj = ModMobEffects.EFFECTS.get("flight_blessing");
-        if (flightObj != null && entity.hasEffect(flightObj.get()) && entity instanceof Player player) {
-            if (player.isFallFlying()) {
-                if (!player.onGround() && !player.isInWater() && !player.hasEffect(MobEffects.LEVITATION)) {
-                    player.startFallFlying();
-                } else {
-                    player.stopFallFlying();
-                }
+        boolean hasFlight = flightObj != null && player.hasEffect(flightObj.get());
+
+        if (!hasFlight) {
+            if (player.getPersistentData().contains(FlightGlidePacket.NBT_FLIGHT_GLIDING)) {
+                player.getPersistentData().remove(FlightGlidePacket.NBT_FLIGHT_GLIDING);
+                player.stopFallFlying();
+            }
+            return;
+        }
+
+        boolean isGliding = player.getPersistentData().getBoolean(FlightGlidePacket.NBT_FLIGHT_GLIDING);
+        if (isGliding) {
+            if (player.onGround() || player.isInWater() || player.hasEffect(MobEffects.LEVITATION)) {
+                // Landed on ground or submerged in water -> stop gliding
+                player.getPersistentData().remove(FlightGlidePacket.NBT_FLIGHT_GLIDING);
+                player.stopFallFlying();
+            } else {
+                // Keep fall flying active in Phase.END right before sendDirtyEntityData() is called
+                player.startFallFlying();
+                player.fallDistance = 0.0F;
             }
         }
     }

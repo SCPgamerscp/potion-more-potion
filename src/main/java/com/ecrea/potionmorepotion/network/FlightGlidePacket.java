@@ -14,13 +14,24 @@ import java.util.function.Supplier;
  */
 public class FlightGlidePacket {
 
+    public static final String NBT_FLIGHT_GLIDING = "pmp_flight_gliding";
+
+    private final boolean start;
+
     public FlightGlidePacket() {
+        this(true);
+    }
+
+    public FlightGlidePacket(boolean start) {
+        this.start = start;
     }
 
     public FlightGlidePacket(FriendlyByteBuf buf) {
+        this(buf.readBoolean());
     }
 
     public void toBytes(FriendlyByteBuf buf) {
+        buf.writeBoolean(this.start);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> supplier) {
@@ -33,11 +44,18 @@ public class FlightGlidePacket {
 
             var effectObj = ModMobEffects.EFFECTS.get("flight_blessing");
             if (effectObj == null || !player.hasEffect(effectObj.get())) {
+                player.getPersistentData().remove(NBT_FLIGHT_GLIDING);
                 return;
             }
 
-            if (!player.onGround() && !player.isInWater() && !player.hasEffect(MobEffects.LEVITATION)) {
-                player.startFallFlying();
+            if (this.start) {
+                if (!player.onGround() && !player.isInWater() && !player.hasEffect(MobEffects.LEVITATION)) {
+                    player.getPersistentData().putBoolean(NBT_FLIGHT_GLIDING, true);
+                    player.startFallFlying();
+                }
+            } else {
+                player.getPersistentData().remove(NBT_FLIGHT_GLIDING);
+                player.stopFallFlying();
             }
         });
         return true;
