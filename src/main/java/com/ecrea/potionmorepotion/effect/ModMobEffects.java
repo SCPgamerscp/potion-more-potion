@@ -29,6 +29,10 @@ public class ModMobEffects {
     public static final Map<String, BlessingDefinition> DEFINITIONS = new LinkedHashMap<>();
     public static final Map<String, RegistryObject<MobEffect>> EFFECTS = new LinkedHashMap<>();
 
+    public static final RegistryObject<MobEffect> IGNORE_IFRAMES_CURSE =
+            MOB_EFFECTS.register("ignore_iframes_curse",
+                    () -> new IgnoreIframesCurseMobEffect(MobEffectCategory.HARMFUL, 0x380036));
+
     static {
         // id, liquid/particle color, icon material, brewing ingredient
         register("oak_blessing", 0x9C7A4B, () -> Items.OAK_LOG, () -> Items.OAK_LOG);

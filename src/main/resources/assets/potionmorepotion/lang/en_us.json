@@ -116,5 +116,11 @@
   "item.minecraft.tipped_arrow.effect.creative_blessing": "Arrow of Blessing of Creative",
 
   "message.potionmorepotion.caelus_missing_login": "\"Caelus API\" mod is required for \"Blessing of Flight\" to function properly.",
-  "message.potionmorepotion.caelus_missing_potion": "Caelus API is not installed. Gliding ability is unavailable."
+  "message.potionmorepotion.caelus_missing_potion": "Caelus API is not installed. Gliding ability is unavailable.",
+
+  "effect.potionmorepotion.ignore_iframes_curse": "Curse of Ignoring i-frames",
+  "item.minecraft.potion.effect.ultimate_curse": "Potion of Ultimate Curse",
+  "item.minecraft.splash_potion.effect.ultimate_curse": "Splash Potion of Ultimate Curse",
+  "item.minecraft.lingering_potion.effect.ultimate_curse": "Lingering Potion of Ultimate Curse",
+  "item.minecraft.tipped_arrow.effect.ultimate_curse": "Arrow of Ultimate Curse"
 }

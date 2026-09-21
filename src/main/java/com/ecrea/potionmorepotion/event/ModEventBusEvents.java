@@ -40,6 +40,17 @@ public class ModEventBusEvents {
                 );
             }
 
+            // Recipe: Ignore I-Frames Blessing Potion + Fermented Spider Eye -> Ultimate Curse Potion
+            var ignoreIframesPotion = ModPotions.POTIONS_MAP.get("ignore_iframes_blessing");
+            if (ignoreIframesPotion != null) {
+                BrewingRecipeRegistry.addRecipe(
+                        StrictNBTIngredient.of(
+                                PotionUtils.setPotion(new ItemStack(Items.POTION), ignoreIframesPotion.get())),
+                        Ingredient.of(Items.FERMENTED_SPIDER_EYE),
+                        PotionUtils.setPotion(new ItemStack(Items.POTION), ModPotions.ULTIMATE_CURSE.get())
+                );
+            }
+
             // Dynamic Caelus API integration:
             // When Caelus API is present, bind the caelus:fall_flying attribute modifier to flight_blessing.
             // This turns the potion effect into a 100% native Elytra flight effect without any Mixins or hard dependencies!

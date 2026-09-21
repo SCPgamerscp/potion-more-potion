@@ -29,10 +29,20 @@ public class IgnoreIframesDamageHandler {
         return false;
     }
 
+    private static boolean hasIgnoreIframesCurse(Entity entity) {
+        if (entity instanceof LivingEntity living) {
+            return ModMobEffects.IGNORE_IFRAMES_CURSE != null && living.hasEffect(ModMobEffects.IGNORE_IFRAMES_CURSE.get());
+        }
+        return false;
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onAttackEntity(AttackEntityEvent event) {
-        if (hasIgnoreIframes(event.getEntity())) {
-            Entity target = event.getTarget();
+        Entity target = event.getTarget();
+        boolean attackerHasBlessing = hasIgnoreIframes(event.getEntity());
+        boolean targetHasCurse = hasIgnoreIframesCurse(target);
+
+        if (attackerHasBlessing || targetHasCurse) {
             if (target instanceof LivingEntity livingTarget) {
                 livingTarget.invulnerableTime = 0;
                 livingTarget.hurtTime = 0;
@@ -46,27 +56,27 @@ public class IgnoreIframesDamageHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingAttack(LivingAttackEvent event) {
+        LivingEntity target = event.getEntity();
         Entity attacker = event.getSource().getEntity();
-        if (hasIgnoreIframes(attacker)) {
-            LivingEntity target = event.getEntity();
+        if (hasIgnoreIframes(attacker) || hasIgnoreIframesCurse(target)) {
             target.invulnerableTime = 0;
         }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingHurt(LivingHurtEvent event) {
+        LivingEntity target = event.getEntity();
         Entity attacker = event.getSource().getEntity();
-        if (hasIgnoreIframes(attacker)) {
-            LivingEntity target = event.getEntity();
+        if (hasIgnoreIframes(attacker) || hasIgnoreIframesCurse(target)) {
             target.invulnerableTime = 0;
         }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
+        LivingEntity target = event.getEntity();
         Entity attacker = event.getSource().getEntity();
-        if (hasIgnoreIframes(attacker)) {
-            LivingEntity target = event.getEntity();
+        if (hasIgnoreIframes(attacker) || hasIgnoreIframesCurse(target)) {
             // Reset after hurt logic has executed so the next hit is not blocked
             target.invulnerableTime = 0;
         }

@@ -116,5 +116,11 @@
   "item.minecraft.tipped_arrow.effect.creative_blessing": "クリエイティブ化の加護の矢",
 
   "message.potionmorepotion.caelus_missing_login": "「飛行の加護」を正常に機能させるには「Caelus API」MODが必要です。",
-  "message.potionmorepotion.caelus_missing_potion": "Caelus API が導入されていないため、滑空機能は利用できません。"
+  "message.potionmorepotion.caelus_missing_potion": "Caelus API が導入されていないため、滑空機能は利用できません。",
+
+  "effect.potionmorepotion.ignore_iframes_curse": "無敵時間無視の呪い",
+  "item.minecraft.potion.effect.ultimate_curse": "究極の呪いのポーション",
+  "item.minecraft.splash_potion.effect.ultimate_curse": "スプラッシュ・究極の呪いのポーション",
+  "item.minecraft.lingering_potion.effect.ultimate_curse": "残留の究極の呪いのポーション",
+  "item.minecraft.tipped_arrow.effect.ultimate_curse": "究極の呪いの矢"
 }

@@ -6,6 +6,7 @@ import com.ecrea.potionmorepotion.effect.BlessingDefinition;
 import com.ecrea.potionmorepotion.effect.ModMobEffects;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -26,6 +27,14 @@ public class ModPotions {
             DeferredRegister.create(Registries.POTION, PotionMorePotionMod.MOD_ID);
 
     public static final Map<String, RegistryObject<Potion>> POTIONS_MAP = new LinkedHashMap<>();
+
+    public static final RegistryObject<Potion> ULTIMATE_CURSE = POTIONS.register("ultimate_curse", () -> new Potion(
+            "ultimate_curse",
+            new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 12000, 6),
+            new MobEffectInstance(MobEffects.POISON, 12000, 6),
+            new MobEffectInstance(MobEffects.WEAKNESS, 12000, 6),
+            new MobEffectInstance(ModMobEffects.IGNORE_IFRAMES_CURSE.get(), 12000, 0)
+    ));
 
     static {
         for (BlessingDefinition definition : ModMobEffects.DEFINITIONS.values()) {
