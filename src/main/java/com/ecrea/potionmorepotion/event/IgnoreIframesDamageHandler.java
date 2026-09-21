@@ -36,6 +36,13 @@ public class IgnoreIframesDamageHandler {
         return false;
     }
 
+    private static void resetTargetIframes(LivingEntity target) {
+        if (target != null) {
+            target.invulnerableTime = 0;
+            target.hurtTime = 0;
+        }
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onAttackEntity(AttackEntityEvent event) {
         Entity target = event.getTarget();
@@ -44,11 +51,11 @@ public class IgnoreIframesDamageHandler {
 
         if (attackerHasBlessing || targetHasCurse) {
             if (target instanceof LivingEntity livingTarget) {
-                livingTarget.invulnerableTime = 0;
+                resetTargetIframes(livingTarget);
                 livingTarget.hurtTime = 0;
             } else if (target instanceof net.minecraftforge.entity.PartEntity<?> part &&
                     part.getParent() instanceof LivingEntity parentLiving) {
-                parentLiving.invulnerableTime = 0;
+                resetTargetIframes(parentLiving);
                 parentLiving.hurtTime = 0;
             }
         }
@@ -59,7 +66,7 @@ public class IgnoreIframesDamageHandler {
         LivingEntity target = event.getEntity();
         Entity attacker = event.getSource().getEntity();
         if (hasIgnoreIframes(attacker) || hasIgnoreIframesCurse(target)) {
-            target.invulnerableTime = 0;
+            resetTargetIframes(target);
         }
     }
 
@@ -68,7 +75,7 @@ public class IgnoreIframesDamageHandler {
         LivingEntity target = event.getEntity();
         Entity attacker = event.getSource().getEntity();
         if (hasIgnoreIframes(attacker) || hasIgnoreIframesCurse(target)) {
-            target.invulnerableTime = 0;
+            resetTargetIframes(target);
         }
     }
 
@@ -78,7 +85,7 @@ public class IgnoreIframesDamageHandler {
         Entity attacker = event.getSource().getEntity();
         if (hasIgnoreIframes(attacker) || hasIgnoreIframesCurse(target)) {
             // Reset after hurt logic has executed so the next hit is not blocked
-            target.invulnerableTime = 0;
+            resetTargetIframes(target);
         }
     }
 }
