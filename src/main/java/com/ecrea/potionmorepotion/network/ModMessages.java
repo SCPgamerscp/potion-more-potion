@@ -17,7 +17,7 @@ public class ModMessages {
 
     public static void register() {
         SimpleChannel net = NetworkRegistry.ChannelBuilder
-                .named(new ResourceLocation(PotionMorePotionMod.MOD_ID, "messages"))
+                .named(ResourceLocation.tryParse(PotionMorePotionMod.MOD_ID + ":messages"))
                 .networkProtocolVersion(() -> "1.0")
                 .clientAcceptedVersions(s -> true)
                 .serverAcceptedVersions(s -> true)
@@ -73,11 +73,6 @@ public class ModMessages {
                 .consumerMainThread(EggBreathPacket::handle)
                 .add();
 
-        net.messageBuilder(FlightGlidePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
-                .decoder(FlightGlidePacket::new)
-                .encoder(FlightGlidePacket::toBytes)
-                .consumerMainThread(FlightGlidePacket::handle)
-                .add();
 
         net.messageBuilder(FlightBoostPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .decoder(FlightBoostPacket::new)

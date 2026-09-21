@@ -41,13 +41,8 @@ public class FlightBoostPacket {
                 return;
             }
 
-            boolean isGliding = player.getPersistentData().getBoolean(FlightGlidePacket.NBT_FLIGHT_GLIDING);
-            if (!player.isFallFlying() && !isGliding) {
-                return;
-            }
-
             if (!player.isFallFlying()) {
-                player.startFallFlying();
+                return;
             }
 
             // Apply vanilla firework rocket propulsion physics
