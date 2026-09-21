@@ -14,7 +14,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.ThrownEgg;
@@ -26,7 +25,6 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.event.TickEvent;
-import com.ecrea.potionmorepotion.network.FlightGlidePacket;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -57,54 +55,7 @@ public class BlessingDamageHandler {
         }
     }
 
-    /**
-     * Server-side player tick at Phase.END:
-     * Maintains fall-flying (elytra gliding) even without an elytra equipped when flight blessing is active.
-     * Calling startFallFlying() here overrides vanilla's updateFallFlying() which clears the flag earlier in aiStep().
-     */
-    @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || event.player.level().isClientSide) {
-            return;
-        }
 
-        Player player = event.player;
-        var flightObj = ModMobEffects.EFFECTS.get("flight_blessing");
-        boolean hasFlight = flightObj != null && player.hasEffect(flightObj.get());
-
-        if (!hasFlight) {
-            if (player.getPersistentData().contains(FlightGlidePacket.NBT_FLIGHT_GLIDING)) {
-                player.getPersistentData().remove(FlightGlidePacket.NBT_FLIGHT_GLIDING);
-                player.stopFallFlying();
-            }
-            return;
-        }
-
-        boolean isGliding = player.getPersistentData().getBoolean(FlightGlidePacket.NBT_FLIGHT_GLIDING);
-        if (isGliding) {
-            // Land only on solid ground with clearance to stand up (preserves flight in 1-block gaps)
-            if (player.onGround() && canStandUp(player)) {
-                player.getPersistentData().remove(FlightGlidePacket.NBT_FLIGHT_GLIDING);
-                player.stopFallFlying();
-            } else {
-                // Keep fall flying active in Phase.END right before sendDirtyEntityData() is called
-                player.startFallFlying();
-                player.fallDistance = 0.0F;
-            }
-        }
-    }
-
-    /**
-     * Checks whether there is enough vertical clearance above the player to stand up (1.8m height).
-     * Only checks [y + 0.6m, y + 1.8m] to avoid false collisions with the floor/ground.
-     */
-    private static boolean canStandUp(Player player) {
-        AABB overheadBox = new AABB(
-                player.getX() - 0.29D, player.getY() + 0.6D, player.getZ() - 0.29D,
-                player.getX() + 0.29D, player.getY() + 1.8D, player.getZ() + 0.29D
-        );
-        return player.level().noCollision(player, overheadBox);
-    }
 
     /**
      * Cancels damage BEFORE hurt logic (hurtTime, hurt animation, red flash, sound, knockback) runs,

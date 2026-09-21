@@ -39,6 +39,26 @@ public class ModEventBusEvents {
                                 ModPotions.POTIONS_MAP.get(definition.id()).get())
                 );
             }
+
+            // Dynamic Caelus API integration:
+            // When Caelus API is present, bind the caelus:fall_flying attribute modifier to flight_blessing.
+            // This turns the potion effect into a 100% native Elytra flight effect without any Mixins or hard dependencies!
+            net.minecraft.resources.ResourceLocation caelusFlightId = net.minecraft.resources.ResourceLocation.tryParse("caelus:fall_flying");
+            if (caelusFlightId != null && net.minecraftforge.registries.ForgeRegistries.ATTRIBUTES.containsKey(caelusFlightId)) {
+                net.minecraft.world.entity.ai.attributes.Attribute flightAttribute = net.minecraftforge.registries.ForgeRegistries.ATTRIBUTES.getValue(caelusFlightId);
+                if (flightAttribute != null) {
+                    var flightObj = ModMobEffects.EFFECTS.get("flight_blessing");
+                    if (flightObj != null) {
+                        flightObj.get().addAttributeModifier(
+                                flightAttribute,
+                                "748D7064-6A60-4F59-8ABE-C2C23A6DD7A9",
+                                1.0D,
+                                net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION
+                        );
+                        com.ecrea.potionmorepotion.PotionMorePotionMod.LOGGER.info("Successfully bound Caelus fall_flying attribute to flight_blessing for native elytra flight!");
+                    }
+                }
+            }
         });
     }
 }
