@@ -10,6 +10,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
@@ -101,8 +103,8 @@ public class FlightBlessingHandler {
             glideTicks++;
             player.startFallFlying();
 
-            // Landing check: Only cancel when on solid ground (never cancel in water, ignore first 5 ticks after liftoff)
-            if (glideTicks > 5 && player.onGround() && !player.isInWater()) {
+            // Landing check: Only cancel when on solid ground AND has clearance to stand up (keeps glide active in 1-block gaps)
+            if (glideTicks > 5 && player.onGround() && !player.isInWater() && canStandUp(player)) {
                 isGliding = false;
                 glideTicks = 0;
                 player.stopFallFlying();
@@ -140,5 +142,17 @@ public class FlightBlessingHandler {
         }
 
         wasJumpDown = isJumpDown;
+    }
+
+    /**
+     * Checks whether there is enough vertical clearance above the player to stand up (1.8m height).
+     * Only checks [y + 0.6m, y + 1.8m] to avoid false collisions with the floor/ground.
+     */
+    public static boolean canStandUp(LocalPlayer player) {
+        AABB overheadBox = new AABB(
+                player.getX() - 0.29D, player.getY() + 0.6D, player.getZ() - 0.29D,
+                player.getX() + 0.29D, player.getY() + 1.8D, player.getZ() + 0.29D
+        );
+        return player.level().noCollision(player, overheadBox);
     }
 }
