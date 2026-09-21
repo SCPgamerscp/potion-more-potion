@@ -10,6 +10,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
@@ -58,9 +59,23 @@ public class FlightBlessingHandler {
         boolean isJumpDown = mc.options.keyJump.isDown() && mc.screen == null;
         boolean justPressed = isJumpDown && !wasJumpDown;
 
-        // 1. Vanilla-style Elytra deployment: press Jump while airborne (jumping or falling)
+        // 1. Ground state handling: strictly reset all flight state when on solid ground.
+        // Returning here guarantees that normal ground jumping (vanilla jumpFromGround) is never interfered with.
+        if (player.onGround()) {
+            if (isGliding || player.isFallFlying()) {
+                isGliding = false;
+                glideTicks = 0;
+                player.stopFallFlying();
+                ModMessages.sendToServer(new FlightGlidePacket(false));
+            }
+            wasJumpDown = isJumpDown;
+            return;
+        }
+
+        // 2. Vanilla-style Elytra deployment:
+        // Vanilla requires: airborne (!onGround), falling (motion.y < 0.0), not already flying, not in water, not levitating
         if (!isGliding && !player.isFallFlying()) {
-            if (justPressed && !player.onGround() && !player.isInWater()) {
+            if (justPressed && player.getDeltaMovement().y < 0.0D && !player.isInWater() && !player.hasEffect(MobEffects.LEVITATION)) {
                 isGliding = true;
                 glideTicks = 0;
                 player.startFallFlying();
@@ -68,48 +83,38 @@ public class FlightBlessingHandler {
             }
         }
 
-        // 2. Active Flight & Glide logic
+        // 3. Active Flight & Glide logic
         if (isGliding || player.isFallFlying()) {
             isGliding = true;
             glideTicks++;
+            player.startFallFlying();
 
-            // Landing check: touching solid ground cancels elytra glide (vanilla behavior).
-            // When gliding into a 1-block gap, landing naturally transitions to Pose.SWIMMING (crawling).
-            if (glideTicks > 1 && player.onGround()) {
-                isGliding = false;
-                glideTicks = 0;
-                player.stopFallFlying();
-                ModMessages.sendToServer(new FlightGlidePacket(false));
-            } else {
-                player.startFallFlying();
+            // Rocket propulsion while holding Jump in mid-air
+            if (isJumpDown) {
+                Vec3 look = player.getLookAngle();
+                Vec3 motion = player.getDeltaMovement();
+                player.setDeltaMovement(motion.add(
+                        look.x * 0.1D + (look.x * 1.5D - motion.x) * 0.5D,
+                        look.y * 0.1D + (look.y * 1.5D - motion.y) * 0.5D,
+                        look.z * 0.1D + (look.z * 1.5D - motion.z) * 0.5D
+                ));
+                player.hasImpulse = true;
 
-                // Rocket propulsion while holding Jump in mid-air
-                if (isJumpDown) {
-                    Vec3 look = player.getLookAngle();
-                    Vec3 motion = player.getDeltaMovement();
-                    player.setDeltaMovement(motion.add(
-                            look.x * 0.1D + (look.x * 1.5D - motion.x) * 0.5D,
-                            look.y * 0.1D + (look.y * 1.5D - motion.y) * 0.5D,
-                            look.z * 0.1D + (look.z * 1.5D - motion.z) * 0.5D
-                    ));
-                    player.hasImpulse = true;
+                // Send boost packet to server to synchronize motion
+                ModMessages.sendToServer(new FlightBoostPacket());
 
-                    // Send boost packet to server to synchronize motion
-                    ModMessages.sendToServer(new FlightBoostPacket());
+                // Visual firework smoke trail
+                player.level().addParticle(ParticleTypes.FIREWORK,
+                        player.getX() - look.x * 0.5,
+                        player.getY() + 0.3 - look.y * 0.5,
+                        player.getZ() - look.z * 0.5,
+                        -look.x * 0.1, -look.y * 0.1, -look.z * 0.1);
 
-                    // Visual firework smoke trail
-                    player.level().addParticle(ParticleTypes.FIREWORK,
-                            player.getX() - look.x * 0.5,
-                            player.getY() + 0.3 - look.y * 0.5,
-                            player.getZ() - look.z * 0.5,
-                            -look.x * 0.1, -look.y * 0.1, -look.z * 0.1);
-
-                    // Sound effect periodically
-                    if (player.tickCount % 10 == 0) {
-                        player.level().playLocalSound(player.getX(), player.getY(), player.getZ(),
-                                SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS,
-                                0.6F, 1.0F + (player.level().random.nextFloat() - player.level().random.nextFloat()) * 0.2F, false);
-                    }
+                // Sound effect periodically
+                if (player.tickCount % 10 == 0) {
+                    player.level().playLocalSound(player.getX(), player.getY(), player.getZ(),
+                            SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS,
+                            0.6F, 1.0F + (player.level().random.nextFloat() - player.level().random.nextFloat()) * 0.2F, false);
                 }
             }
         }
