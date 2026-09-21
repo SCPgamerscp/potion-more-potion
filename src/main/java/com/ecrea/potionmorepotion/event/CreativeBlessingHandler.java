@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Handles the Blessing of Creative (creative_blessing):
  * 1. Temporarily switches player to CREATIVE mode (creative flight, instant block breaking, creative inventory).
- * 2. Allows player to take damage with 50% blessing reduction and regeneration (invulnerable = false).
+ * 2. Grants complete damage and death immunity (invulnerable = true, void and /kill immunity).
  * 3. Enforces nearby hostile mobs (Enemy) to target and attack the player.
  * 4. Renders survival HUD (hearts and food level) on the client even while in creative mode.
  * 5. Safely restores the previous game mode upon effect expiration.
