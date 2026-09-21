@@ -128,6 +128,7 @@ public class CreativeBlessingHandler {
                 int height = event.getWindow().getGuiScaledHeight();
 
                 forgeGui.setupOverlayRenderState(true, false);
+                forgeGui.renderExperienceBar(event.getGuiGraphics(), width / 2 - 91);
                 forgeGui.renderHealth(width, height, event.getGuiGraphics());
                 forgeGui.renderFood(width, height, event.getGuiGraphics());
             }
