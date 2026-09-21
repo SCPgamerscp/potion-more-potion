@@ -113,5 +113,8 @@
   "item.minecraft.potion.effect.creative_blessing": "Potion of Blessing of Creative",
   "item.minecraft.splash_potion.effect.creative_blessing": "Splash Potion of Blessing of Creative",
   "item.minecraft.lingering_potion.effect.creative_blessing": "Lingering Potion of Blessing of Creative",
-  "item.minecraft.tipped_arrow.effect.creative_blessing": "Arrow of Blessing of Creative"
+  "item.minecraft.tipped_arrow.effect.creative_blessing": "Arrow of Blessing of Creative",
+
+  "message.potionmorepotion.caelus_missing_login": "\"Caelus API\" mod is required for \"Blessing of Flight\" to function properly.",
+  "message.potionmorepotion.caelus_missing_potion": "Caelus API is not installed. Gliding ability is unavailable."
 }

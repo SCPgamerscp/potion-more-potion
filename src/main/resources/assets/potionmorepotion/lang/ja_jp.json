@@ -113,5 +113,8 @@
   "item.minecraft.potion.effect.creative_blessing": "クリエイティブ化の加護のポーション",
   "item.minecraft.splash_potion.effect.creative_blessing": "スプラッシュ・クリエイティブ化の加護のポーション",
   "item.minecraft.lingering_potion.effect.creative_blessing": "残留のクリエイティブ化の加護のポーション",
-  "item.minecraft.tipped_arrow.effect.creative_blessing": "クリエイティブ化の加護の矢"
+  "item.minecraft.tipped_arrow.effect.creative_blessing": "クリエイティブ化の加護の矢",
+
+  "message.potionmorepotion.caelus_missing_login": "「飛行の加護」を正常に機能させるには「Caelus API」MODが必要です。",
+  "message.potionmorepotion.caelus_missing_potion": "Caelus API が導入されていないため、滑空機能は利用できません。"
 }
