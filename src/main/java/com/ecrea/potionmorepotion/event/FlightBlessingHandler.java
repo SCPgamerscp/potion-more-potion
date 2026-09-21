@@ -11,6 +11,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
@@ -59,17 +60,21 @@ public class FlightBlessingHandler {
         boolean isJumpDown = mc.options.keyJump.isDown() && mc.screen == null;
         boolean justPressed = isJumpDown && !wasJumpDown;
 
-        // 1. Ground state handling: strictly reset all flight state when on solid ground.
-        // Returning here guarantees that normal ground jumping (vanilla jumpFromGround) is never interfered with.
+        // 1. Ground state handling:
+        // When on solid ground, ONLY cancel flight if the player has clearance to stand up!
+        // In 1-block gaps (!canStandUp), keep flight active so the player glides through smoothly.
         if (player.onGround()) {
-            if (isGliding || player.isFallFlying()) {
-                isGliding = false;
-                glideTicks = 0;
-                player.stopFallFlying();
-                ModMessages.sendToServer(new FlightGlidePacket(false));
+            if (canStandUp(player)) {
+                if (isGliding || player.isFallFlying()) {
+                    isGliding = false;
+                    glideTicks = 0;
+                    player.stopFallFlying();
+                    ModMessages.sendToServer(new FlightGlidePacket(false));
+                }
+                wasJumpDown = isJumpDown;
+                return;
             }
-            wasJumpDown = isJumpDown;
-            return;
+            // In 1-block gaps: do NOT return! Proceed to flight logic below so gliding & acceleration continue!
         }
 
         // 2. Vanilla-style Elytra deployment:
@@ -120,5 +125,17 @@ public class FlightBlessingHandler {
         }
 
         wasJumpDown = isJumpDown;
+    }
+
+    /**
+     * Checks whether there is enough vertical clearance above the player to stand up (1.8m height).
+     * Only checks [y + 0.6m, y + 1.8m] to avoid false collisions with the floor/ground.
+     */
+    public static boolean canStandUp(LocalPlayer player) {
+        AABB overheadBox = new AABB(
+                player.getX() - 0.29D, player.getY() + 0.6D, player.getZ() - 0.29D,
+                player.getX() + 0.29D, player.getY() + 1.8D, player.getZ() + 0.29D
+        );
+        return player.level().noCollision(player, overheadBox);
     }
 }
