@@ -19,6 +19,7 @@ import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.ThrownEgg;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
@@ -223,6 +224,13 @@ public class BlessingDamageHandler {
             }
         }
 
+        // 9. Creative Blessing: completely immune to ALL damage sources (including void and kill)
+        var creativeObj = ModMobEffects.EFFECTS.get("creative_blessing");
+        if (creativeObj != null && entity.hasEffect(creativeObj.get())) {
+            event.setCanceled(true);
+            return;
+        }
+
         // Cancel vanilla environmental lightning damage from inside thunderHit()
         // so that our player-attributed damage from LightningAttackPacket takes effect instead!
         if (source.is(DamageTypes.LIGHTNING_BOLT) && source.getEntity() == null && source.getDirectEntity() == null) {
@@ -388,6 +396,12 @@ public class BlessingDamageHandler {
             }
         }
 
+        var creativeObj = ModMobEffects.EFFECTS.get("creative_blessing");
+        if (creativeObj != null && entity.hasEffect(creativeObj.get())) {
+            event.setCanceled(true);
+            return;
+        }
+
         if (source.is(DamageTypes.LIGHTNING_BOLT) && source.getEntity() == null && source.getDirectEntity() == null) {
             event.setCanceled(true);
             return;
@@ -411,5 +425,18 @@ public class BlessingDamageHandler {
         }
 
         event.setAmount(event.getAmount() * remainingFraction);
+    }
+
+    /**
+     * Completely prevents death from any source (including /kill and void) while Creative Blessing is active.
+     */
+    @SubscribeEvent
+    public static void onLivingDeath(LivingDeathEvent event) {
+        LivingEntity entity = event.getEntity();
+        var creativeObj = ModMobEffects.EFFECTS.get("creative_blessing");
+        if (creativeObj != null && entity.hasEffect(creativeObj.get())) {
+            event.setCanceled(true);
+            entity.setHealth(entity.getMaxHealth());
+        }
     }
 }
