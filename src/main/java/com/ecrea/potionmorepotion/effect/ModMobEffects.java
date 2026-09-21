@@ -49,6 +49,7 @@ public class ModMobEffects {
         register("explosion_blessing", 0xCC2200, () -> Items.TNT, () -> Items.TNT);
         register("egg_blessing", 0xFFF5D7, () -> Items.EGG, () -> Items.EGG);
         register("flight_blessing", 0x70C0F0, () -> Items.FEATHER, () -> Items.FEATHER);
+        register("creative_blessing", 0x80DEEA, () -> Items.NETHER_STAR, () -> Items.NETHER_STAR);
     }
 
     private static void register(String id, int color, Supplier<Item> iconItem, Supplier<Item> brewingIngredient) {

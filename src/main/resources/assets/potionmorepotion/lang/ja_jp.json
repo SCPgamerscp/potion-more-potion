@@ -107,5 +107,11 @@
   "item.minecraft.potion.effect.flight_blessing": "飛行の加護のポーション",
   "item.minecraft.splash_potion.effect.flight_blessing": "スプラッシュ・飛行の加護のポーション",
   "item.minecraft.lingering_potion.effect.flight_blessing": "残留の飛行の加護のポーション",
-  "item.minecraft.tipped_arrow.effect.flight_blessing": "飛行の加護の矢"
+  "item.minecraft.tipped_arrow.effect.flight_blessing": "飛行の加護の矢",
+
+  "effect.potionmorepotion.creative_blessing": "クリエイティブ化の加護",
+  "item.minecraft.potion.effect.creative_blessing": "クリエイティブ化の加護のポーション",
+  "item.minecraft.splash_potion.effect.creative_blessing": "スプラッシュ・クリエイティブ化の加護のポーション",
+  "item.minecraft.lingering_potion.effect.creative_blessing": "残留のクリエイティブ化の加護のポーション",
+  "item.minecraft.tipped_arrow.effect.creative_blessing": "クリエイティブ化の加護の矢"
 }
