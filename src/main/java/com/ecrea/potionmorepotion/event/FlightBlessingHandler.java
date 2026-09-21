@@ -10,8 +10,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Pose;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
@@ -20,17 +18,14 @@ import net.minecraftforge.fml.common.Mod;
 
 /**
  * Client-side handler for the Flight Blessing (Blessing of Flight).
- * 1. Double-tap Jump (Space) to activate elytra glide and liftoff into the air (ground or mid-air).
- * 2. Hold Jump while gliding to continuously accelerate with rocket firework propulsion in look direction.
- * 3. Continues flying even through water.
- * 4. Only cancels flight upon landing on solid ground.
- * 5. Single jump remains 100% normal vanilla jumping.
+ * 1. Jump while airborne to activate vanilla elytra glide (just like equipping an Elytra).
+ * 2. Hold Jump while gliding to accelerate with rocket firework propulsion in look direction.
+ * 3. Lands naturally upon touching ground, transitioning smoothly to crawling (Pose.SWIMMING) in 1-block gaps.
  */
 @Mod.EventBusSubscriber(modid = PotionMorePotionMod.MOD_ID, value = Dist.CLIENT)
 public class FlightBlessingHandler {
 
     private static boolean wasJumpDown = false;
-    private static int doubleTapTimer = 0;
     private static int glideTicks = 0;
     private static boolean isGliding = false;
 
@@ -44,7 +39,6 @@ public class FlightBlessingHandler {
         LocalPlayer player = mc.player;
         if (player == null || mc.level == null) {
             wasJumpDown = false;
-            doubleTapTimer = 0;
             glideTicks = 0;
             isGliding = false;
             return;
@@ -57,7 +51,6 @@ public class FlightBlessingHandler {
                 ModMessages.sendToServer(new FlightGlidePacket(false));
             }
             wasJumpDown = mc.options.keyJump.isDown();
-            doubleTapTimer = 0;
             glideTicks = 0;
             return;
         }
@@ -65,52 +58,32 @@ public class FlightBlessingHandler {
         boolean isJumpDown = mc.options.keyJump.isDown() && mc.screen == null;
         boolean justPressed = isJumpDown && !wasJumpDown;
 
-        // Decrement double-tap timer every tick
-        if (doubleTapTimer > 0) {
-            doubleTapTimer--;
-        }
-
-        // 1. Double-tap detection for initiating flight
+        // 1. Vanilla-style Elytra deployment: press Jump while airborne (jumping or falling)
         if (!isGliding && !player.isFallFlying()) {
-            if (justPressed) {
-                if (doubleTapTimer > 0) {
-                    // Double-tap triggered!
-                    doubleTapTimer = 0;
-                    isGliding = true;
-                    glideTicks = 0;
-                    player.startFallFlying();
-                    ModMessages.sendToServer(new FlightGlidePacket(true));
-
-                    // Liftoff boost: launch upward smoothly into the air
-                    Vec3 motion = player.getDeltaMovement();
-                    Vec3 look = player.getLookAngle();
-                    player.setDeltaMovement(new Vec3(
-                            motion.x * 0.5D + look.x * 0.2D,
-                            Math.max(motion.y, 0.55D),
-                            motion.z * 0.5D + look.z * 0.2D
-                    ));
-                    player.hasImpulse = true;
-                } else {
-                    // First tap recorded, start 7-tick window (approx 0.35s)
-                    doubleTapTimer = 7;
-                }
+            if (justPressed && !player.onGround() && !player.isInWater()) {
+                isGliding = true;
+                glideTicks = 0;
+                player.startFallFlying();
+                ModMessages.sendToServer(new FlightGlidePacket(true));
             }
         }
 
-        // 2. Flight & Glide active logic
+        // 2. Active Flight & Glide logic
         if (isGliding || player.isFallFlying()) {
             isGliding = true;
             glideTicks++;
-            player.startFallFlying();
 
-            // Landing check: Only cancel when on solid ground AND has clearance to stand up (keeps glide active in 1-block gaps)
-            if (glideTicks > 5 && player.onGround() && !player.isInWater() && canStandUp(player)) {
+            // Landing check: touching solid ground cancels elytra glide (vanilla behavior).
+            // When gliding into a 1-block gap, landing naturally transitions to Pose.SWIMMING (crawling).
+            if (glideTicks > 1 && player.onGround()) {
                 isGliding = false;
                 glideTicks = 0;
                 player.stopFallFlying();
                 ModMessages.sendToServer(new FlightGlidePacket(false));
             } else {
-                // Rocket propulsion while holding Jump
+                player.startFallFlying();
+
+                // Rocket propulsion while holding Jump in mid-air
                 if (isJumpDown) {
                     Vec3 look = player.getLookAngle();
                     Vec3 motion = player.getDeltaMovement();
@@ -142,17 +115,5 @@ public class FlightBlessingHandler {
         }
 
         wasJumpDown = isJumpDown;
-    }
-
-    /**
-     * Checks whether there is enough vertical clearance above the player to stand up (1.8m height).
-     * Only checks [y + 0.6m, y + 1.8m] to avoid false collisions with the floor/ground.
-     */
-    public static boolean canStandUp(LocalPlayer player) {
-        AABB overheadBox = new AABB(
-                player.getX() - 0.29D, player.getY() + 0.6D, player.getZ() - 0.29D,
-                player.getX() + 0.29D, player.getY() + 1.8D, player.getZ() + 0.29D
-        );
-        return player.level().noCollision(player, overheadBox);
     }
 }

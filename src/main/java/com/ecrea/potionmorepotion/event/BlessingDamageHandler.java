@@ -13,9 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.ThrownEgg;
@@ -83,8 +81,9 @@ public class BlessingDamageHandler {
 
         boolean isGliding = player.getPersistentData().getBoolean(FlightGlidePacket.NBT_FLIGHT_GLIDING);
         if (isGliding) {
-            // Land only on solid ground with clearance to stand up (preserves flight in 1-block gaps)
-            if (player.onGround() && !player.isInWater() && canStandUp(player)) {
+            // Land on ground: vanilla style landing cancels elytra glide.
+            // When gliding into a 1-block gap, vanilla naturally transitions to Pose.SWIMMING (crawling).
+            if (player.onGround()) {
                 player.getPersistentData().remove(FlightGlidePacket.NBT_FLIGHT_GLIDING);
                 player.stopFallFlying();
             } else {
@@ -93,18 +92,6 @@ public class BlessingDamageHandler {
                 player.fallDistance = 0.0F;
             }
         }
-    }
-
-    /**
-     * Checks whether there is enough vertical clearance above the player to stand up (1.8m height).
-     * Only checks [y + 0.6m, y + 1.8m] to avoid false collisions with the floor/ground.
-     */
-    private static boolean canStandUp(Player player) {
-        AABB overheadBox = new AABB(
-                player.getX() - 0.29D, player.getY() + 0.6D, player.getZ() - 0.29D,
-                player.getX() + 0.29D, player.getY() + 1.8D, player.getZ() + 0.29D
-        );
-        return player.level().noCollision(player, overheadBox);
     }
 
     /**
