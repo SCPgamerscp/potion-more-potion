@@ -62,15 +62,6 @@ public class CreativeBlessingHandler {
                     player.onUpdateAbilities();
                 }
 
-                // Void protection: launch upward or teleport to safety if falling below world bottom
-                if (player.getY() < player.level().getMinBuildHeight() - 10) {
-                    player.setDeltaMovement(player.getDeltaMovement().x, 1.5D, player.getDeltaMovement().z);
-                    player.hasImpulse = true;
-                    if (player.getY() < player.level().getMinBuildHeight() - 50) {
-                        player.teleportTo(player.getX(), player.level().getMinBuildHeight() + 10.0D, player.getZ());
-                    }
-                }
-
                 // 2. Force nearby hostile mobs to target the player
                 if (player.tickCount % 5 == 0) {
                     AABB searchBox = player.getBoundingBox().inflate(32.0D);
