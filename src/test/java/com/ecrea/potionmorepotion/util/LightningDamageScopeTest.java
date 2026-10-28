@@ -1,5 +1,7 @@
 package com.ecrea.potionmorepotion.util;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Plain Java regression checks for the synthetic-lightning scope.
  *
@@ -30,14 +32,23 @@ public final class LightningDamageScopeTest {
         }
 
         LightningDamageScope.runWithoutVanillaHitDamage(() -> {
-            Thread other = new Thread(() ->
-                    check(!LightningDamageScope.isActive(), "other threads must not inherit suppression"));
+            AtomicReference<Throwable> otherFailure = new AtomicReference<>();
+            Thread other = new Thread(() -> {
+                try {
+                    check(!LightningDamageScope.isActive(), "other threads must not inherit suppression");
+                } catch (Throwable failure) {
+                    otherFailure.set(failure);
+                }
+            });
             other.start();
             try {
                 other.join();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new AssertionError(e);
+            }
+            if (otherFailure.get() != null) {
+                throw new AssertionError("thread isolation failed", otherFailure.get());
             }
         });
         check(!LightningDamageScope.isActive(), "normal lightning must remain enabled afterward");
