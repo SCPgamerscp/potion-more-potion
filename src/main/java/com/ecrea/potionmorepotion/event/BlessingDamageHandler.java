@@ -4,6 +4,7 @@ import com.ecrea.potionmorepotion.Config;
 import com.ecrea.potionmorepotion.PotionMorePotionMod;
 import com.ecrea.potionmorepotion.effect.BlessingMobEffect;
 import com.ecrea.potionmorepotion.effect.ModMobEffects;
+import com.ecrea.potionmorepotion.util.LightningDamageScope;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -194,9 +195,10 @@ public class BlessingDamageHandler {
             return;
         }
 
-        // Cancel vanilla environmental lightning damage from inside thunderHit()
-        // so that our player-attributed damage from LightningAttackPacket takes effect instead!
-        if (source.is(DamageTypes.LIGHTNING_BOLT) && source.getEntity() == null && source.getDirectEntity() == null) {
+        // Only suppress the vanilla hit inside our Lightning Blessing's synthetic
+        // thunderHit(). Natural lightning (and other mods' lightning) must still hurt.
+        if (LightningDamageScope.isActive() && source.is(DamageTypes.LIGHTNING_BOLT)
+                && source.getEntity() == null && source.getDirectEntity() == null) {
             event.setCanceled(true);
             return;
         }
@@ -365,7 +367,8 @@ public class BlessingDamageHandler {
             return;
         }
 
-        if (source.is(DamageTypes.LIGHTNING_BOLT) && source.getEntity() == null && source.getDirectEntity() == null) {
+        if (LightningDamageScope.isActive() && source.is(DamageTypes.LIGHTNING_BOLT)
+                && source.getEntity() == null && source.getDirectEntity() == null) {
             event.setCanceled(true);
             return;
         }
