@@ -1,6 +1,7 @@
 package com.ecrea.potionmorepotion.network;
 
 import com.ecrea.potionmorepotion.effect.ModMobEffects;
+import com.ecrea.potionmorepotion.util.LightningDamageScope;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -134,7 +135,10 @@ public class LightningAttackPacket {
                 // 3. If living entity: trigger mob transformations (Charged Creeper, Piglin, Witch, Mooshroom)
                 // and 8-second burning debuff on enemy
                 if (target instanceof LivingEntity living) {
-                    living.thunderHit(level, bolt);
+                    // Keep vanilla transformations, but suppress only the unattributed
+                    // lightning damage from this call. The player-credited hit below
+                    // must run outside the scope to avoid losing its damage.
+                    LightningDamageScope.runWithoutVanillaHitDamage(() -> living.thunderHit(level, bolt));
                     living.setSecondsOnFire(8);
                     living.setLastHurtByPlayer(player);
                 }
